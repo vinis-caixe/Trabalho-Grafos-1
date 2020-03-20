@@ -30,7 +30,7 @@ typedef struct TipoLista {
 
 /* Estrutura do grafo*/
 typedef struct TipoGrafo {
-  TipoLista Adj[62];    // Lista dos adjacentes
+  TipoLista Adj[63];
   int NumVertices;
   int NumArestas;
 } TipoGrafo;
@@ -68,6 +68,7 @@ void le_arquivo(int vetores[159][2]) {
     }
 
     transforma_em_int(vetores, arq);
+    fclose(arq);
 }
 
 /* Função responsável por criar a lista de adjacentes */
@@ -98,6 +99,34 @@ void libera_grafo(TipoGrafo *Grafo) {
     }
 }
 
+/* Função responsável para inserir as arestas do grafo */
+void insere_aresta(int vertice, TipoLista *Lista) {
+    Lista->Ultimo->Prox = (Apontador) malloc (sizeof(Celula));
+    Lista->Ultimo = Lista->Ultimo->Prox;
+    Lista->Ultimo->Vertice = vertice;
+    Lista->Ultimo->Prox = NULL;
+}
+
+short Vazia(TipoLista Lista) {
+    return (Lista.Primeiro == Lista.Ultimo);
+}
+
+void ImprimeGrafo(TipoGrafo *Grafo)
+
+{ int i;  Apontador Aux;
+ for (i = 0; i < Grafo->NumVertices; i++) 
+   { printf("Vertice%2d:", i);
+     if (!Vazia(Grafo->Adj[i])) 
+     { Aux = Grafo->Adj[i].Primeiro->Prox;
+       while (Aux != NULL) 
+	 { printf("%3d", Aux->Vertice);
+	   Aux = Aux->Prox;
+	 }
+     }
+     putchar('\n');
+   }
+} 
+
 int main() {
     int vetores[159][2];
     le_arquivo(vetores);
@@ -111,10 +140,16 @@ int main() {
 
     TipoGrafo Grafo;
     
-    Grafo.NumVertices = 62;
+    Grafo.NumVertices = 63;
     Grafo.NumArestas = 159;
 
     cria_grafo_vazio(&Grafo);
+
+    for(int i = 0; i < 159; i++) {
+        insere_aresta(vetores[i][1], &Grafo.Adj[vetores[i][0]]);
+        insere_aresta(vetores[i][0], &Grafo.Adj[vetores[i][1]]);
+    }
+    ImprimeGrafo(&Grafo);
 
     libera_grafo(&Grafo);
 
