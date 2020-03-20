@@ -107,7 +107,28 @@ void insere_aresta(int vertice, TipoLista *Lista) {
     Lista->Ultimo->Prox = NULL;
 }
 
-short Vazia(TipoLista Lista) {
+/* Função responsável para encontrar o grau do grafo */
+void encontra_grau(TipoGrafo *Grafo) {
+    Apontador aux;
+    int grau = 0;
+    for(int i = 1; i < Grafo->NumVertices; i++) {
+        printf("Golfinho %d: ", i);
+        if(Grafo->Adj[i].Primeiro == Grafo->Adj[i].Ultimo) {    // Caso não tenha adjacentes
+            printf("0");
+        } else {
+            aux = Grafo->Adj[i].Primeiro->Prox;
+            while(aux != NULL) {
+                grau++;
+                aux = aux->Prox;
+            }
+            printf("%d", grau);
+            grau = 0;
+        }
+        printf("\n");
+    }
+}
+
+int Vazia(TipoLista Lista) {
     return (Lista.Primeiro == Lista.Ultimo);
 }
 
@@ -149,7 +170,10 @@ int main() {
         insere_aresta(vetores[i][1], &Grafo.Adj[vetores[i][0]]);
         insere_aresta(vetores[i][0], &Grafo.Adj[vetores[i][1]]);
     }
-    ImprimeGrafo(&Grafo);
+    //ImprimeGrafo(&Grafo);
+
+    printf("---------- GRAU DOS VERTICES ----------\n");
+    encontra_grau(&Grafo);
 
     libera_grafo(&Grafo);
 
