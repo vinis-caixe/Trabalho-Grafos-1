@@ -35,9 +35,10 @@ typedef struct TipoGrafo {
     int NumArestas;
 } TipoGrafo;
 
+/* Estrutura do clique */
 typedef struct Clique {
-    int Membros[62];
-    int vazio;
+    int Membros[62];    // 62 possíveis membros do clique
+    int vazio;          // Indica se o clique está vazio
 } Clique;
 
 /* Função responsável pela transformação dos dados lidos no arquivo em inteiros, armazenados na matriz vetores*/
