@@ -134,6 +134,7 @@ void encontra_grau(TipoGrafo *Grafo) {
     }
 }
 
+/* Função responsável para checar se o conjunto é vazio, caso sim, marca como vazio */
 void conjunto_vazio(Clique *conjunto) {
     int contador = 0;
     for(int i = 0; i < 62; i++) {   
