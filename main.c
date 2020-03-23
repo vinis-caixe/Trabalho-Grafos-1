@@ -35,10 +35,10 @@ typedef struct TipoGrafo {
     int NumArestas;
 } TipoGrafo;
 
-/* Estrutura do clique */
+/* Estrutura dos conjuntos que fazem parte da operação de clique */
 typedef struct Clique {
-    int Membros[62];    // 62 possíveis membros do clique
-    int vazio;          // Indica se o clique está vazio
+    int Membros[62];    // 62 possíveis membros do conjunto
+    int vazio;          // Indica se o conjunto está vazio
 } Clique;
 
 /* Função responsável pela transformação dos dados lidos no arquivo em inteiros, armazenados na matriz vetores*/
@@ -134,6 +134,16 @@ void encontra_grau(TipoGrafo *Grafo) {
     }
 }
 
+void conjunto_vazio(Clique *conjunto) {
+    int contador = 0;
+    for(int i = 0; i < 62; i++) {   
+        if(conjunto->Membros[i] == 0)
+            contador++;
+    }
+    if(contador == 62)
+        conjunto->vazio = 1;
+}
+
 /* Função responsável para realizar a união de um conjunto e o singleton */
 void uniao(Clique *R_ou_X, Clique *AuxR_ou_AuxX, int v, int opcao) {
     int contador = 0;
@@ -149,22 +159,9 @@ void uniao(Clique *R_ou_X, Clique *AuxR_ou_AuxX, int v, int opcao) {
         R_ou_X->vazio = 0;
     }
     
-    // Checa se o original ou auxiliar são vazios
-    contador = 0;
-    for(int i = 0; i < 62; i++) {   
-        if(AuxR_ou_AuxX->Membros[i] == 0)
-            contador++;
-    }
-    if(contador == 62)
-        AuxR_ou_AuxX->vazio = 1;
-
-    contador = 0;
-    for(int i = 0; i < 62; i++) {
-        if(R_ou_X->Membros[i] == 0)
-            contador++;
-    }
-    if(contador == 62)
-        R_ou_X->vazio = 1;
+    // Checa se o original e auxiliar são vazios
+    conjunto_vazio(AuxR_ou_AuxX);
+    conjunto_vazio(R_ou_X);
 }
 
 /* Função responsável para encontrar os adjacentes (vizinhos) do vértice procurado */
@@ -202,21 +199,8 @@ void intersecao(Clique *P_ou_X, Clique *AuxP_ou_AuxX, int v, TipoGrafo *Grafo) {
     }
 
     // Checa se o original ou auxiliar são vazios
-    contador = 0;
-    for(int i = 0; i < 62; i++) {
-        if(AuxP_ou_AuxX->Membros[i] == 0)
-            contador++;
-    }
-    if(contador == 62)
-        AuxP_ou_AuxX->vazio = 1;
-
-    contador = 0;
-    for(int i = 0; i < 62; i++) {
-        if(P_ou_X->Membros[i] == 0)
-            contador++;
-    }
-    if(contador == 62)
-        P_ou_X->vazio = 1;
+    conjunto_vazio(AuxP_ou_AuxX);
+    conjunto_vazio(P_ou_X);
 }
 
 /* Função responsável para realizar o complemento entre um conjunto e o singleton */
@@ -231,16 +215,10 @@ void complemento(Clique *P, int v) {
             P->Membros[i+1] = 0;
         }
     }
+    P->Membros[61] = 0;
 
     // Checa se o original é vazio
-    P->Membros[61] = 0;
-    int contador = 0;
-    for(int i = 0; i < 62; i++) {
-        if(P->Membros[i] == 0)
-            contador++;
-    }
-    if(contador == 62)
-        P->vazio = 1;
+    conjunto_vazio(P);
 }
 
 /* Função responsável para encontrar os cliques maximais */
@@ -264,7 +242,7 @@ void BronKerbosch(TipoGrafo *Grafo, Clique *R, Clique *P, Clique *X) {
             printf(" %d", R->Membros[i]);
             i++;
         }
-        printf("   [%d vertices]", i);
+        printf("   (%d vertices)", i);
         printf("\n");
     }
 
