@@ -1,6 +1,7 @@
 /*
 Trabalho 1 de Teoria e Aplicação de Grafos
 Pedro Vitor Valença Mizuno - 17/0043665
+Vinícius Caixeta de Souza - 18/0132199
 
 @inproceedings{nr-aaai15,
     title = {The Network Data Repository with Interactive Graph Analytics and Visualization},
@@ -20,7 +21,7 @@ typedef struct Struct_Celula *Apontador;
 struct Struct_Celula {
     int Vertice;
     Apontador Prox;
-}; 
+};
 typedef struct Struct_Celula Celula;
 
 /* Estrutura da lista */
@@ -137,7 +138,7 @@ void encontra_grau(TipoGrafo *Grafo) {
 /* Função responsável para checar se o conjunto é vazio, caso sim, marca como vazio */
 void conjunto_vazio(Clique *conjunto) {
     int contador = 0;
-    for(int i = 0; i < 62; i++) {   
+    for(int i = 0; i < 62; i++) {
         if(conjunto->Membros[i] == 0)
             contador++;
     }
@@ -159,7 +160,7 @@ void uniao(Clique *R_ou_X, Clique *AuxR_ou_AuxX, int v, int opcao) {
         R_ou_X->Membros[contador] = v;
         R_ou_X->vazio = 0;
     }
-    
+
     // Checa se o original e auxiliar são vazios
     conjunto_vazio(AuxR_ou_AuxX);
     conjunto_vazio(R_ou_X);
@@ -206,7 +207,7 @@ void intersecao(Clique *P_ou_X, Clique *AuxP_ou_AuxX, int v, TipoGrafo *Grafo) {
 
 /* Função responsável para realizar o complemento entre um conjunto e o singleton */
 void complemento(Clique *P, int v) {
-    int aux, flag = 0;
+    int flag = 0;
     for(int i = 0; i < 62; i++) {   // Procura por um vértice igual ao singleton
         if(P->Membros[i] == v) {
             flag = 1;
@@ -263,12 +264,72 @@ void BronKerbosch(TipoGrafo *Grafo, Clique *R, Clique *P, Clique *X) {
     }
 }
 
+/* Função responsável por calcular o coeficiente de aglomeração de um vértice */
+float CoefDeAglomeracao(TipoGrafo *Grafo, int Golfinho){
+    int adjacente;
+    float cont = 0, n = 0, Resultado;
+    Apontador aux1, aux2, aux3;
+
+    // Calcula quantos vértices são adjacentes ao golfinho
+    aux1 = Grafo->Adj[Golfinho].Primeiro->Prox;
+    while(aux1 != NULL){
+        n++;
+        aux1 = aux1->Prox;
+    }
+
+    if(n == 1){
+        printf("Golfinho %d: 1.00\n", Golfinho);
+        return 1.00;
+    }
+
+    aux1 = Grafo->Adj[Golfinho].Primeiro->Prox;
+    while(aux1 != NULL){
+        adjacente = aux1->Vertice;
+        aux2 = aux1->Prox;
+
+        // Calcula quantos vértices adjacentes de um golfinho são também adjacentes a um determinado vértice adjacente
+        while(aux2 != NULL){
+            aux3 = Grafo->Adj[aux2->Vertice].Primeiro->Prox;
+
+            while(aux3 != NULL){
+                if(aux3->Vertice == adjacente){
+                    cont++;
+                }
+                aux3 = aux3->Prox;
+            }
+
+            aux2 = aux2->Prox;
+        }
+
+        aux1 = aux1->Prox;
+    }
+
+    Resultado = cont / (n * ((n-1) / 2));
+    printf("Golfinho %d: %.2f\n", Golfinho, Resultado);
+
+    return Resultado;
+}
+
+/* Função responsável por calcular o coeficiente médio de aglomeração do grafo */
+void MediaDeAglomeracao(TipoGrafo *Grafo){
+    float Media = 0;
+    int i;
+
+    for(i=1; i<=62; i++){
+        Media = Media + CoefDeAglomeracao(Grafo, i);
+    }
+
+    Media = Media / 62;
+
+    printf("\nCOEFICIENTE MEDIO DE AGLOMERACAO DO GRAFO: %.2f\n", Media);
+}
+
 int main() {
     int vetores[159][2];
     le_arquivo(vetores);
 
     TipoGrafo Grafo;
-    
+
     Grafo.NumVertices = 63;
     Grafo.NumArestas = 159;
 
@@ -294,6 +355,9 @@ int main() {
     }
 
     BronKerbosch(&Grafo, &R, &P, &X);
+
+    printf("\n\n---------- COEFICIENTE DE AGLOMERACAO ----------\n");
+    MediaDeAglomeracao(&Grafo);
 
     libera_grafo(&Grafo);
 
