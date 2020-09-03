@@ -12,6 +12,8 @@ Vinícius Caixeta de Souza - 18/0132199
 }
 */
 
+// Parte do código foi utilizada a partir do link fornecido pelo professor: http://www2.dcc.ufmg.br/livros/algoritmos-edicao2/cap7/codigo/c/7.4a7.5e7.8-grafolistaap.c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -277,9 +279,9 @@ float CoefDeAglomeracao(TipoGrafo *Grafo, int Golfinho){
         aux1 = aux1->Prox;
     }
 
-    if(n == 1){
-        printf("Golfinho %d: 1.00\n", Golfinho);
-        return 1.00;
+    if(n <= 1){
+        printf("Golfinho %d: 0.00\n", Golfinho);
+        return 0.00;
     }
 
     aux1 = Grafo->Adj[Golfinho].Primeiro->Prox;
