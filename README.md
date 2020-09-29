@@ -1,2 +1,2 @@
-# Trabalho-Grafos-1
-Trabalho de Grafos, Caixeta e Pedro
+Repositório com os projetos da disciplina
+Projeto e Análise de Algorítmos 2020/1
