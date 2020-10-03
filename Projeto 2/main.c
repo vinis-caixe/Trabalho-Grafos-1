@@ -106,7 +106,7 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus[]) {
 
     fila = criaFILA();
 
-    // Enfileira se o grau de chegada do vértice for 0
+    // Se o grau de chegada do vértice for 0 ele é colocado no final da fila
     for(i = 0; i < 32; i++) {
         if(graus[i] == 0) {
             enfileirar(fila, Grafo->Adj[i]);
@@ -139,6 +139,8 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus[]) {
 
     if(contador != 32)
         printf("Nao eh possivel ter uma ordem topologica\n");
+    
+    liberaFILA(fila);
 }
 
 /*Função responsável por liberar a memória alocada pelo DAG*/
