@@ -1,13 +1,15 @@
 #include "fila.h"
 #include <string.h>
 
+/*Função responsável por criar as listas de adjacências*/
 void cria_lista_vazia(TipoLista *Lista, char codigo[]) {
     Lista->Primeiro = (Apontador) malloc (sizeof(Celula));
     Lista->Ultimo = Lista->Primeiro;
-    strcpy(Lista->Codigo_Vetor, codigo);
+    strcpy(Lista->Codigo_Vetor, codigo);    // Armazenamos o código da disciplina
     Lista->Primeiro->Prox = NULL;
 }
 
+/*Função responsável por criar o grafo, enviando o código da disciplina para identificação*/
 void cria_grafo_vazio(TipoGrafo *Grafo) {
     char codigos[32][8] = {"CIC0003", "CIC0004", "CIC0142", "MAT0025",
     "CIC0002", "CIC0090", "CIC0229", "CIC0231",
@@ -21,6 +23,7 @@ void cria_grafo_vazio(TipoGrafo *Grafo) {
         cria_lista_vazia(&Grafo->Adj[i], codigos[i]);
 }
 
+/*Função que insere os valores respectivos a cada aresta*/
 void insere_aresta(int id, char codigo[], int peso, TipoLista *Lista) {
     Lista->Ultimo->Prox = (Apontador) malloc (sizeof(Celula));
     Lista->Ultimo = Lista->Ultimo->Prox;
@@ -30,6 +33,7 @@ void insere_aresta(int id, char codigo[], int peso, TipoLista *Lista) {
     Lista->Ultimo->Prox = NULL;
 }
 
+/*Função que realiza chamadas com os valores para serem armazenados nas arestas*/
 void monta_grafo(TipoGrafo *Grafo) {
     insere_aresta(5, "CIC0090", 4, &Grafo->Adj[1]);
     insere_aresta(6, "CIC0229", 4, &Grafo->Adj[1]);
@@ -63,11 +67,12 @@ void monta_grafo(TipoGrafo *Grafo) {
     insere_aresta(31, "CIC0204", 4, &Grafo->Adj[26]);
 }
 
+/*Função responsável pela impressão do DAG*/
 void imprime_grafo(TipoGrafo *Grafo) {
     Apontador Aux;
     for(int i = 0; i < Grafo->NumVertices; i++) {
         printf("%s: ", Grafo->Adj[i].Codigo_Vetor);
-        if(Grafo->Adj[i].Primeiro != Grafo->Adj[i].Ultimo) {
+        if(Grafo->Adj[i].Primeiro != Grafo->Adj[i].Ultimo) {    // Se não for vazio
             Aux = Grafo->Adj[i].Primeiro->Prox;
             while(Aux != NULL) {
                 printf("%s %d -> ", Aux->Codigo, Aux->Peso);
@@ -78,58 +83,52 @@ void imprime_grafo(TipoGrafo *Grafo) {
     }
 }
 
+/*Função que encontra os graus de chegada dos vértices*/
 void encontra_grau(TipoGrafo *Grafo, int graus[]) {
     Apontador aux;
     int i;
     for(i = 0; i < 32; i++)
-        graus[i] = 0;
+        graus[i] = 0;   // Vetor de 32 espaços armazenando o grau dos 32 vértices
 
     for(i = 0; i < 32; i++) {
         aux = Grafo->Adj[i].Primeiro->Prox;
         while(aux != NULL) {
-            graus[aux->Id]++;
+            graus[aux->Id]++;   // Aumenta o grau de chegada do vértice a medida que encontra adjacências
             aux = aux->Prox;
         }
     }
 }
 
-void algoritmo_Khan(TipoGrafo *Grafo, int graus[]) {
+/*Algorítmo responsável por encontrar a ordenação topológica do DAG*/
+void algoritmo_Kahn(TipoGrafo *Grafo, int graus[]) {
     FILA **fila;
     int contador = 0, i;
 
     fila = criaFILA();
 
+    // Enfileira se o grau de chegada do vértice for 0
     for(i = 0; i < 32; i++) {
         if(graus[i] == 0) {
             enfileirar(fila, Grafo->Adj[i]);
-            graus[i] = -1;
+            graus[i] = -1;  // Marca como já enfileirado
         }
     }
 
     Apontador aux;
 
-    /*for(i = 0; i < 32; i++){
-        aux = Grafo->Adj[i].Primeiro->Prox;
-        while(aux != NULL){
-            if(!(strcmp(vertice_removido.Codigo_Vetor, aux->Codigo))){
-                graus[i]--;
-            }
-            aux = aux->Prox;
-        }
-    }*/
-
-    while(!ehVaziaFILA(fila)){
+    while(!ehVaziaFILA(fila)){  // Se a fila não for vazia
         TipoLista vertice_removido = primeiroFILA(fila);
         desenfileirar(fila);
+        printf("%s\n", vertice_removido.Codigo_Vetor);  // Remove o primeiro da fila e printa seu código
         contador++;
         for(i = 0; i < 32; i++) {
-            if(!(strcmp(vertice_removido.Codigo_Vetor, Grafo->Adj[i].Codigo_Vetor))){
+            if(!(strcmp(vertice_removido.Codigo_Vetor, Grafo->Adj[i].Codigo_Vetor))){   // Se o código do removido for igual ao código do vértice agora testado
                 aux = Grafo->Adj[i].Primeiro->Prox;
                 while(aux != NULL) {
-                    graus[aux->Id]--;
+                    graus[aux->Id]--;   // Diminui o grau dos adjacentes ao vértice atual
                     if(graus[aux->Id] == 0) {
-                        enfileirar(fila, Grafo->Adj[i]);
-                        graus[aux->Id] = -1;
+                        enfileirar(fila, Grafo->Adj[aux->Id]);  // Enfileira o atual
+                        graus[aux->Id] = -1;    // Marca como já enfileirado
                     }
                     aux = aux->Prox;
                 }
@@ -142,6 +141,7 @@ void algoritmo_Khan(TipoGrafo *Grafo, int graus[]) {
         printf("Nao eh possivel ter uma ordem topologica\n");
 }
 
+/*Função responsável por liberar a memória alocada pelo DAG*/
 void libera_grafo(TipoGrafo *Grafo) {
     Apontador anterior, aux;
     for(int i = 0; i < Grafo->NumVertices; i++) {
@@ -170,12 +170,13 @@ int main(){
 
     monta_grafo(&Grafo);
 
-    printf("-----BACHARELADO EM CIENCIA DA COMPUTACAO-----\n\nDAG:\n");
+    printf("\n\n-----BACHARELADO EM CIENCIA DA COMPUTACAO-----\n\n------DAG------\n");
 
     imprime_grafo(&Grafo);
 
     encontra_grau(&Grafo, graus);
 
+    printf("\n------ORDENACAO TOPOLOGICA------\n\n");
     algoritmo_Khan(&Grafo, graus);
 
     libera_grafo(&Grafo);
