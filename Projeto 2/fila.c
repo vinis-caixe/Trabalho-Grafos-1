@@ -19,6 +19,7 @@ int ehVaziaFILA(FILA **inicio) {
     return 0;
 }
 
+// Coloca um novo nó no final da fila
 int enfileirar(FILA **inicio, TipoLista novo) {
     FILA *novono, *aux, *ant;
     aux = *inicio;
@@ -47,6 +48,7 @@ int enfileirar(FILA **inicio, TipoLista novo) {
     return 1;
 }
 
+// Retira o primeiro nó da fila
 int desenfileirar(FILA **inicio) {
     if(ehVaziaFILA(inicio) == 1) {
         return 0;
@@ -83,6 +85,7 @@ void limparFILA(FILA **inicio) {
 
 }
 
+// Retorna o primeiro nó da fila
 TipoLista primeiroFILA(FILA **primeiro) {
 
     FILA *auxi;
