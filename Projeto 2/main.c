@@ -179,7 +179,7 @@ int main(){
     encontra_grau(&Grafo, graus);
 
     printf("\n------ORDENACAO TOPOLOGICA------\n\n");
-    algoritmo_Khan(&Grafo, graus);
+    algoritmo_Kahn(&Grafo, graus);
 
     libera_grafo(&Grafo);
 
