@@ -2,11 +2,12 @@
 #include <string.h>
 
 /*Função responsável por criar as listas de adjacências*/
-void cria_lista_vazia(TipoLista *Lista, char codigo[], int peso) {
+void cria_lista_vazia(TipoLista *Lista, char codigo[], int peso, int id) {
     Lista->Primeiro = (Apontador) malloc (sizeof(Celula));
     Lista->Ultimo = Lista->Primeiro;
-    strcpy(Lista->Codigo_Vetor, codigo);    // Armazenamos o código da disciplina
-    Lista->Peso_Vetor = peso;
+    strcpy(Lista->Codigo_Vertice, codigo);    // Armazenamos o código da disciplina
+    Lista->Peso_Vertice = peso;
+    Lista->Id_Vertice = id;
     Lista->Primeiro->Prox = NULL;
 }
 
@@ -22,7 +23,7 @@ void cria_grafo_vazio(TipoGrafo *Grafo) {
     "CIC0205", "CIC0189", "CIC0201", "CIC0204"};
     int pesos[32] = {4, 6, 2, 6, 4, 4, 4, 2, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4};
     for(int i = 0; i < Grafo->NumVertices; i++)
-        cria_lista_vazia(&Grafo->Adj[i], codigos[i], pesos[i]);
+        cria_lista_vazia(&Grafo->Adj[i], codigos[i], pesos[i], i);
 }
 
 /*Função que insere os valores respectivos a cada aresta*/
@@ -74,7 +75,7 @@ void monta_grafo_reverso(TipoGrafo *Grafo, TipoGrafo *Reverso) {
     for(int i = 0; i < 32; i++) {
         aux = Grafo->Adj[i].Primeiro->Prox;
         while(aux != NULL){
-            insere_aresta(i, Grafo->Adj[i].Codigo_Vetor, Grafo->Adj[i].Peso_Vetor, &Reverso->Adj[aux->Id]);
+            insere_aresta(i, Grafo->Adj[i].Codigo_Vertice, Grafo->Adj[i].Peso_Vertice, &Reverso->Adj[aux->Id]);
             aux = aux->Prox;
         }
     }
@@ -84,7 +85,7 @@ void monta_grafo_reverso(TipoGrafo *Grafo, TipoGrafo *Reverso) {
 void imprime_grafo(TipoGrafo *Grafo) {
     Apontador Aux;
     for(int i = 0; i < Grafo->NumVertices; i++) {
-        printf("%s: ", Grafo->Adj[i].Codigo_Vetor);
+        printf("%s: ", Grafo->Adj[i].Codigo_Vertice);
         if(Grafo->Adj[i].Primeiro != Grafo->Adj[i].Ultimo) {    // Se não for vazio
             Aux = Grafo->Adj[i].Primeiro->Prox;
             while(Aux != NULL) {
@@ -135,10 +136,10 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus_chegada[]) {
     while(!ehVaziaFILA(fila)){  // Se a fila não for vazia
         TipoLista vertice_removido = primeiroFILA(fila);
         desenfileirar(fila);
-        printf("%s\n", vertice_removido.Codigo_Vetor);  // Remove o primeiro da fila e printa seu código
+        printf("%s\n", vertice_removido.Codigo_Vertice);  // Remove o primeiro da fila e printa seu código
         contador++;
         for(i = 0; i < 32; i++) {
-            if(!(strcmp(vertice_removido.Codigo_Vetor, Grafo->Adj[i].Codigo_Vetor))){   // Se o código do removido for igual ao código do vértice agora testado
+            if(!(strcmp(vertice_removido.Codigo_Vertice, Grafo->Adj[i].Codigo_Vertice))){   // Se o código do removido for igual ao código do vértice agora testado
                 aux = Grafo->Adj[i].Primeiro->Prox;
                 while(aux != NULL) {
                     graus_chegada[aux->Id]--;   // Diminui o grau dos adjacentes ao vértice atual
@@ -159,23 +160,44 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus_chegada[]) {
     liberaFILA(fila);
 }
 
-void algoritmo_backflow(TipoGrafo *Grafo, TipoGrafo *Reverso, int graus_chegada[], int graus_saida[]) {
-    int peso_critico = 0, pesos_gerais[32];
+void recursao_backflow(TipoGrafo *Reverso, TipoLista Vertice, int peso_critico, int peso_local, FILA_CRITICO **caminho_critico) {
     Apontador aux;
-    for(int i = 0; i < 32; i++) {
-        for(int j = 0; j < 32; j++)
-            pesos_gerais[j] = 0;
+    int cont = 0;
+    if(Vertice.Primeiro->Prox == NULL) {
+        enfileirar_CRITICO(caminho_critico, Vertice.Id_Vertice); // AO INVES DE ENFILEIRAR, FAZER UMA LISTA PARA TIRAR O ULTIMO ELEMENTO
+        if(peso_local > peso_critico)
+            peso_critico = peso_local;
             
-        if(graus_saida[i] == 0) {   // Se é um dos vértices finais
-            peso_critico += Reverso->Adj[i].Peso_Vetor;
-            aux = Reverso->Adj[i].Primeiro->Prox;
-            while(aux != NULL) {
-                pesos_gerais[aux->Id] += aux->Peso;
-                aux = aux->Prox;
-            }
+        printf("peso critico: %d", peso_critico);
+    } else {
+        aux = Vertice.Primeiro->Prox;
+        while(aux != NULL) {
+            peso_local += aux->Peso;
+            enfileirar_CRITICO(caminho_critico, aux->Id);
+            //printf("%s ",Vertice.Codigo_Vertice);
+            recursao_backflow(Reverso, Reverso->Adj[aux->Id], peso_critico, peso_local, caminho_critico);
+            aux = aux->Prox;
+            peso_local -= Vertice.Peso_Vertice;
         }
+    }
+    peso_local -= Vertice.Peso_Vertice;
+}
+
+void algoritmo_backflow(TipoGrafo *Grafo, TipoGrafo *Reverso, int graus_chegada[], int graus_saida[]) {
+    int peso_critico = 0, peso_local = 0;
+    FILA_CRITICO **caminho_critico;
+    caminho_critico = criaFILA_CRITICO();
+    for(int i = 0; i < 32; i++) {
+        if(graus_saida[i] == 0) {   // Se é um dos vértices finais
+            peso_local += Reverso->Adj[i].Peso_Vertice;
+            recursao_backflow(Reverso, Reverso->Adj[i], peso_critico, peso_local, caminho_critico);
+            printf("     \n");
+        }
+        peso_local = 0;
         peso_critico = 0;
     }
+
+    liberaFILA_CRITICO(caminho_critico);
 }
 
 /*Função responsável por liberar a memória alocada pelo DAG*/
