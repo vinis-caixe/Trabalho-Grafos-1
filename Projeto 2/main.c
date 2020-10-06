@@ -1,4 +1,5 @@
 #include "fila.h"
+#include "lista.h"
 #include <string.h>
 
 /*Função responsável por criar as listas de adjacências*/
@@ -160,44 +161,87 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus_chegada[]) {
     liberaFILA(fila);
 }
 
-void recursao_backflow(TipoGrafo *Reverso, TipoLista Vertice, int peso_critico, int peso_local, FILA_CRITICO **caminho_critico) {
+void tres_caminhos_criticos(LISTA **caminho_critico, int peso_critico, int tres_PC[], int tres_CC[3][6]) {
+    int flag, k;
+    for(int i = 0; i < 3; i++) {
+        flag = 0;
+        if(tres_PC[i] < peso_critico) {
+            for(int j = 0; j < 6; j++) {
+                k = 0;
+                while(PosicaoLISTA(caminho_critico, k)) {
+                    if(tres_CC[i][j] == PosicaoLISTA(caminho_critico, k))
+                        flag = 1;
+                    k++;
+                }
+                if(flag == 1)
+                    break;
+            }
+            if(flag == 0){
+                for(int l = 0; l < 6; l++) {
+                    tres_CC[i][l] = PosicaoLISTA(caminho_critico, l);
+                }
+                tres_PC[i] = peso_critico;
+                break;
+            }
+        }
+        /*flag = 0;
+        if(tres_PC[i] < peso_critico) {
+            tres_PC[i] = peso_critico;
+            for(int j = 0; j < 6; j++) {
+                k = 0;
+                while(PosicaoLISTA(caminho_critico, k)) {
+                    if(tres_CC[i][j] == PosicaoLISTA(caminho_critico, k))
+                        flag = 1;
+                    k++;
+                }
+                if(flag == 1)
+                    break;
+            }
+            if(flag == 0){
+                for(int l = 0; l < 6; l++) {
+                    tres_CC[i][l] = PosicaoLISTA(caminho_critico, l);
+                }
+            }
+            break;
+        }*/
+    }
+}
+
+void recursao_backflow(TipoGrafo *Reverso, TipoLista Vertice, int peso_critico, int peso_local, LISTA **caminho_critico, int tres_PC[], int tres_CC[3][6]) {
     Apontador aux;
-    int cont = 0;
-    if(Vertice.Primeiro->Prox == NULL) {
-        enfileirar_CRITICO(caminho_critico, Vertice.Id_Vertice); // AO INVES DE ENFILEIRAR, FAZER UMA LISTA PARA TIRAR O ULTIMO ELEMENTO
-        if(peso_local > peso_critico)
-            peso_critico = peso_local;
-            
-        printf("peso critico: %d", peso_critico);
+    if(Vertice.Primeiro->Prox == NULL && peso_local > peso_critico) {
+        peso_critico = peso_local;
+        tres_caminhos_criticos(caminho_critico, peso_critico, tres_PC, tres_CC);
     } else {
         aux = Vertice.Primeiro->Prox;
         while(aux != NULL) {
             peso_local += aux->Peso;
-            enfileirar_CRITICO(caminho_critico, aux->Id);
-            //printf("%s ",Vertice.Codigo_Vertice);
-            recursao_backflow(Reverso, Reverso->Adj[aux->Id], peso_critico, peso_local, caminho_critico);
+            InsereFinalLISTA(caminho_critico, aux->Id);
+            recursao_backflow(Reverso, Reverso->Adj[aux->Id], peso_critico, peso_local, caminho_critico, tres_PC, tres_CC);
             aux = aux->Prox;
             peso_local -= Vertice.Peso_Vertice;
+            RemoveFinalLISTA(caminho_critico);
         }
     }
     peso_local -= Vertice.Peso_Vertice;
 }
 
-void algoritmo_backflow(TipoGrafo *Grafo, TipoGrafo *Reverso, int graus_chegada[], int graus_saida[]) {
+void algoritmo_backflow(TipoGrafo *Grafo, TipoGrafo *Reverso, int graus_saida[], int tres_PC[], int tres_CC[3][6]) {
     int peso_critico = 0, peso_local = 0;
-    FILA_CRITICO **caminho_critico;
-    caminho_critico = criaFILA_CRITICO();
+    LISTA **caminho_critico;
+    caminho_critico = CriaIniciaLISTA();
     for(int i = 0; i < 32; i++) {
         if(graus_saida[i] == 0) {   // Se é um dos vértices finais
             peso_local += Reverso->Adj[i].Peso_Vertice;
-            recursao_backflow(Reverso, Reverso->Adj[i], peso_critico, peso_local, caminho_critico);
-            printf("     \n");
+            InsereFinalLISTA(caminho_critico, Reverso->Adj[i].Id_Vertice);
+            recursao_backflow(Reverso, Reverso->Adj[i], peso_critico, peso_local, caminho_critico, tres_PC, tres_CC);
+            RemoveFinalLISTA(caminho_critico);
         }
         peso_local = 0;
         peso_critico = 0;
     }
 
-    liberaFILA_CRITICO(caminho_critico);
+    LiberaLISTA(caminho_critico);
 }
 
 /*Função responsável por liberar a memória alocada pelo DAG*/
@@ -215,14 +259,22 @@ void libera_grafo(TipoGrafo *Grafo) {
     }
 }
 
+void gera_dot(TipoGrafo *Grafo) {
+    FILE *arq = fopen("grafo.dot", "w");
+    if(arq == NULL) {
+        printf("Erro ao criar o arquivo\n");
+    }
+    
 
+    fclose(arq);
+}
 
 int main(){
 
     TipoGrafo Grafo;
     Grafo.NumVertices = 32;
     Grafo.NumArestas = 30;
-
+    
     int graus_chegada[32], graus_saida[32];
 
     cria_grafo_vazio(&Grafo);
@@ -247,11 +299,23 @@ int main(){
     cria_grafo_vazio(&Grafo_Reverso);
     monta_grafo_reverso(&Grafo, &Grafo_Reverso);
 
-    algoritmo_backflow(&Grafo, &Grafo_Reverso, graus_chegada, graus_saida);
+    int tres_PC[3], tres_CC[3][6];
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 6; j++)
+            tres_CC[i][j] = 0;
+        tres_PC[i] = 0;
+    }
 
+    algoritmo_backflow(&Grafo, &Grafo_Reverso, graus_saida, tres_PC, tres_CC);
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 6; j++)
+            printf("%d ", tres_CC[i][j]);
+        printf("pc: %d\n", tres_PC[i]);
+    }
+    
     libera_grafo(&Grafo);
 
     libera_grafo(&Grafo_Reverso);
-
     return 0;
 }

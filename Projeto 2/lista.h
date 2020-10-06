@@ -1,35 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct dados{
-    int info;
-};
-typedef struct dados Data;
-
 struct node{
-    Data elem;
+    int elem;
     struct node *prox;
 };
-typedef struct node LADAE;
+typedef struct node LISTA;
 
-LADAE** CriaIniciaLADAE();
+LISTA** CriaIniciaLISTA();
 
-int ExisteLADAE(LADAE **inicio);
+int ExisteLISTA(LISTA **inicio);
 
-int ehVaziaLADAE(LADAE **inicio);
+int ehVaziaLISTA(LISTA **inicio);
 
-int InsereInicioLADAE(LADAE **inicio, Data novo);
+int InsereInicioLISTA(LISTA **inicio, int novo);
 
-int InsereFinalLADAE(LADAE **inicio, Data novo);
+int InsereFinalLISTA(LISTA **inicio, int novo);
 
-int BuscaLADAE(LADAE **inicio, int elemento);
+int PosicaoLISTA(LISTA **inicio, int posicao);
 
-int RemoveInicioLADAE(LADAE **inicio);
+int BuscaLISTA(LISTA **inicio, int elemento);
 
-int RemoveFinalLADAE(LADAE **inicio);
+int RemoveInicioLISTA(LISTA **inicio);
 
-void ImprimeLADAE(LADAE **inicio);
+int RemoveFinalLISTA(LISTA **inicio);
 
-void LimpaLADAE(LADAE **inicio);
+void ImprimeLISTA(LISTA **inicio);
 
-void LiberaLADAE(LADAE **inicio);
+void LimpaLISTA(LISTA **inicio);
+
+void LiberaLISTA(LISTA **inicio);

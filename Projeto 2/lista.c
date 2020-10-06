@@ -1,43 +1,43 @@
-#include "ladae.h"
+#include "lista.h"
 
-LADAE ** CriaIniciaLADAE(){
-	LADAE **novo;
+LISTA ** CriaIniciaLISTA(){
+	LISTA **novo;
 
-	novo = (LADAE **) malloc(sizeof(LADAE *));
+	novo = (LISTA **) malloc(sizeof(LISTA *));
 
 	*novo = NULL;
 
 	return novo;
 }
 
-int ExisteLADAE(LADAE **inicio){
+int ExisteLISTA(LISTA **inicio){
 	if(inicio == NULL)
 		return 0;
 
 	return 1;
 }
 
-int ehVaziaLADAE(LADAE **inicio){
+int ehVaziaLISTA(LISTA **inicio){
 	if(*inicio == NULL)
 		return 1;
 
 	return 0;
 }
 
-int InsereInicioLADAE(LADAE **inicio, Data novo){
-	if(ExisteLADAE(inicio) == 0)
+int InsereInicioLISTA(LISTA **inicio, int novo){
+	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
-	LADAE *novono;
+	LISTA *novono;
 
-	novono = (LADAE *) malloc(sizeof(LADAE));
+	novono = (LISTA *) malloc(sizeof(LISTA));
 	if(novono == NULL)
 		return 0;
 
 	novono->prox = NULL;
 	novono->elem = novo;
 
-	LADAE *aux;
+	LISTA *aux;
 
 	aux = *inicio;
 
@@ -48,21 +48,23 @@ int InsereInicioLADAE(LADAE **inicio, Data novo){
 	return 1;
 }
 
-int InsereFinalLADAE(LADAE **inicio, Data novo){
-	if(ExisteLADAE(inicio) == 0)
+int InsereFinalLISTA(LISTA **inicio, int novo){
+	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
-	LADAE *aux, *ant, *novono;
+	LISTA *aux, *ant, *novono;
 
-	novono = (LADAE *) malloc(sizeof(LADAE));
+	novono = (LISTA *) malloc(sizeof(LISTA));
 	if(novono == NULL)
 		return 0;
 
 	novono->elem = novo;
 	novono->prox = NULL;
 
-	if(ehVaziaLADAE(inicio) == 1)
+	if(ehVaziaLISTA(inicio) == 1){
 		*inicio = novono;
+		return 1;
+	}
 
 	aux = *inicio;
 
@@ -77,21 +79,45 @@ int InsereFinalLADAE(LADAE **inicio, Data novo){
 	return 1;
 }
 
-int BuscaLADAE(LADAE **inicio, int elemento){
-	if(ExisteLADAE(inicio) == 0)
+int PosicaoLISTA(LISTA **inicio, int posicao){
+	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
-	if(ehVaziaLADAE(inicio) == 1)
+	if(ehVaziaLISTA(inicio) == 1)
 		return 0;
 
-	int i = 1;
+	int atual = 0;
 
-	LADAE *aux;
+	LISTA *aux;
 
 	aux = *inicio;
 
 	while(aux != NULL){
-		if(aux->elem.info == elemento)
+		if(atual == posicao)
+			return aux->elem;
+
+		atual++;
+		aux = aux->prox;
+	}
+
+	return 0;
+}
+
+int BuscaLISTA(LISTA **inicio, int elemento){
+	if(ExisteLISTA(inicio) == 0)
+		return 0;
+
+	if(ehVaziaLISTA(inicio) == 1)
+		return 0;
+
+	int i = 1;
+
+	LISTA *aux;
+
+	aux = *inicio;
+
+	while(aux != NULL){
+		if(aux->elem == elemento)
 			return i;
 
 		i++;
@@ -102,14 +128,14 @@ int BuscaLADAE(LADAE **inicio, int elemento){
 	return 0;
 }
 
-int RemoveInicioLADAE(LADAE **inicio){
-	if(ExisteLADAE(inicio) == 0)
+int RemoveInicioLISTA(LISTA **inicio){
+	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
-	if(ehVaziaLADAE(inicio) == 1)
+	if(ehVaziaLISTA(inicio) == 1)
 		return 0;
 
-	LADAE *aux;
+	LISTA *aux;
 
 	aux = *inicio;
 
@@ -120,14 +146,14 @@ int RemoveInicioLADAE(LADAE **inicio){
 	return 1;
 }
 
-int RemoveFinalLADAE(LADAE **inicio){
-	if(ExisteLADAE(inicio) == 0)
+int RemoveFinalLISTA(LISTA **inicio){
+	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
-	if(ehVaziaLADAE(inicio) == 1)
+	if(ehVaziaLISTA(inicio) == 1)
 		return 0;
 
-	LADAE *aux, *ant;
+	LISTA *aux, *ant;
 
 	aux = *inicio;
 
@@ -150,37 +176,37 @@ int RemoveFinalLADAE(LADAE **inicio){
 	return 1;
 }
 
-void ImprimeLADAE(LADAE **inicio){
-	if(ExisteLADAE(inicio) == 0){
+void ImprimeLISTA(LISTA **inicio){
+	if(ExisteLISTA(inicio) == 0){
 		printf("Erro! Lista nao existe.");
 		return;
 	}
 
-	if(ehVaziaLADAE(inicio) == 1){
+	if(ehVaziaLISTA(inicio) == 1){
 		printf("Lista vazia.");
 		return;
 	}
 
-	LADAE *aux;
+	LISTA *aux;
 
 	aux = *inicio;
 
 	while(aux != NULL){
-		printf("%d => ", aux->elem.info);
+		printf("%d => ", aux->elem);
 		aux = aux->prox;
 	}
 
 	printf("\n");
 }
 
-void LimpaLADAE(LADAE **inicio){
-	if(ehVaziaLADAE(inicio) == 1)
+void LimpaLISTA(LISTA **inicio){
+	if(ehVaziaLISTA(inicio) == 1)
 		return;
 
-	if(ExisteLADAE(inicio) == 0)
+	if(ExisteLISTA(inicio) == 0)
 		return;
 
-	LADAE *aux, *ant;
+	LISTA *aux, *ant;
 
 	aux = *inicio;
 
@@ -195,12 +221,12 @@ void LimpaLADAE(LADAE **inicio){
 	*inicio = NULL;
 }
 
-void LiberaLADAE(LADAE **inicio){
+void LiberaLISTA(LISTA **inicio){
 
-	if(ExisteLADAE(inicio) == 0)
+	if(ExisteLISTA(inicio) == 0)
 		return;
 
-	LADAE *aux, *ant;
+	LISTA *aux, *ant;
 
 	aux = *inicio;
 
