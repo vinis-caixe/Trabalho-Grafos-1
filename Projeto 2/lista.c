@@ -100,7 +100,7 @@ int PosicaoLISTA(LISTA **inicio, int posicao){
 		aux = aux->prox;
 	}
 
-	return 0;
+	return -1;
 }
 
 int BuscaLISTA(LISTA **inicio, int elemento){

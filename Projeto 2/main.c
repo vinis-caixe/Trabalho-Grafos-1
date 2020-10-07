@@ -162,48 +162,51 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus_chegada[]) {
 }
 
 void tres_caminhos_criticos(LISTA **caminho_critico, int peso_critico, int tres_PC[], int tres_CC[3][6]) {
-    int flag, k;
-    for(int i = 0; i < 3; i++) {
-        flag = 0;
-        if(tres_PC[i] < peso_critico) {
-            for(int j = 0; j < 6; j++) {
-                k = 0;
-                while(PosicaoLISTA(caminho_critico, k)) {
-                    if(tres_CC[i][j] == PosicaoLISTA(caminho_critico, k))
-                        flag = 1;
-                    k++;
-                }
-                if(flag == 1)
-                    break;
+    int vertices_CC[18], k, repete = -1, i, menor_PC = 99, menor_i;
+    for(i = 0; i < 3; i++) {
+        for(int j = 0; j < 6; j++) {
+            vertices_CC[6*i + j] = tres_CC[i][j];
+        }
+    }
+    for(i = 0; i < 18; i++) {
+        k = 0;
+        while(PosicaoLISTA(caminho_critico, k) != -1) {
+            if(vertices_CC[i] == PosicaoLISTA(caminho_critico, k)) {
+                repete = i;
             }
-            if(flag == 0){
-                for(int l = 0; l < 6; l++) {
-                    tres_CC[i][l] = PosicaoLISTA(caminho_critico, l);
-                }
-                tres_PC[i] = peso_critico;
-                break;
+            k++;
+        }
+    }
+    if(repete == -1) {  // se nao repete
+        for(i = 0; i < 3; i++) {
+            if(menor_PC > tres_PC[i]) {
+                menor_PC = tres_PC[i];
+                menor_i = i;
             }
         }
-        /*flag = 0;
-        if(tres_PC[i] < peso_critico) {
-            tres_PC[i] = peso_critico;
-            for(int j = 0; j < 6; j++) {
-                k = 0;
-                while(PosicaoLISTA(caminho_critico, k)) {
-                    if(tres_CC[i][j] == PosicaoLISTA(caminho_critico, k))
-                        flag = 1;
-                    k++;
+        for(i = 0; i < 6; i++) {
+            if(PosicaoLISTA(caminho_critico, i) != -1) {
+                vertices_CC[6*menor_i + i] = PosicaoLISTA(caminho_critico, i);
+            } else
+                vertices_CC[6*menor_i + i] = 0;
+        }
+        tres_PC[menor_i] = peso_critico;
+    } else {
+        if(tres_PC[repete/6] < peso_critico) {
+            tres_PC[repete/6] = peso_critico;
+            for(i = 0; i < 6; i++) {
+                if(PosicaoLISTA(caminho_critico, i) != -1) {
+                    vertices_CC[(repete-(repete%6)) + i] = PosicaoLISTA(caminho_critico, i);
                 }
-                if(flag == 1)
-                    break;
+                else
+                    vertices_CC[(repete-(repete%6)) + i] = 0;
             }
-            if(flag == 0){
-                for(int l = 0; l < 6; l++) {
-                    tres_CC[i][l] = PosicaoLISTA(caminho_critico, l);
-                }
-            }
-            break;
-        }*/
+        }
+    }
+    for(i = 0; i < 3; i++) {
+        for(int j = 0; j < 6; j++) {
+            tres_CC[i][j] = vertices_CC[6*i + j];
+        }
     }
 }
 
@@ -306,12 +309,17 @@ int main(){
         tres_PC[i] = 0;
     }
 
+    printf("\n---TRES MAIORES CAMINHOS CRITICOS COM VERTICES DIFERENTES---\n\n");
+
     algoritmo_backflow(&Grafo, &Grafo_Reverso, graus_saida, tres_PC, tres_CC);
 
     for(int i = 0; i < 3; i++) {
-        for(int j = 0; j < 6; j++)
-            printf("%d ", tres_CC[i][j]);
-        printf("pc: %d\n", tres_PC[i]);
+        for(int j = 0; j < 6; j++) {
+            if(tres_CC[i][j] != 0) {
+                printf("%s%d ", j != 0 ? "<- " : "", tres_CC[i][j]);
+            }
+        }
+        printf("Peso total: %d\n", tres_PC[i]);
     }
     
     libera_grafo(&Grafo);
