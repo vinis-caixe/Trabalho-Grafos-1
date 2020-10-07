@@ -4,7 +4,7 @@
 typedef struct Struct_Celula *Apontador;
 struct Struct_Celula {
     int Id;
-    char Codigo[7];
+    char Codigo[6];
     int Peso;
     Apontador Prox;
 };
@@ -12,9 +12,10 @@ typedef struct Struct_Celula Celula;
 
 typedef struct TipoLista {
     Apontador Primeiro, Ultimo;
-    char Codigo_Vertice[7];
+    char Codigo_Vertice[6];
     int Peso_Vertice;
     int Id_Vertice;
+    char Nome_Vertice[42];
 } TipoLista;
 
 typedef struct TipoGrafo {

@@ -3,28 +3,38 @@
 #include <string.h>
 
 /*Função responsável por criar as listas de adjacências*/
-void cria_lista_vazia(TipoLista *Lista, char codigo[], int peso, int id) {
+void cria_lista_vazia(TipoLista *Lista, char codigo[], int peso, int id, char nome[]) {
     Lista->Primeiro = (Apontador) malloc (sizeof(Celula));
     Lista->Ultimo = Lista->Primeiro;
     strcpy(Lista->Codigo_Vertice, codigo);    // Armazenamos o código da disciplina
     Lista->Peso_Vertice = peso;
     Lista->Id_Vertice = id;
+    strcpy(Lista->Nome_Vertice, nome);
     Lista->Primeiro->Prox = NULL;
 }
 
 /*Função responsável por criar o grafo, enviando o código da disciplina para identificação*/
 void cria_grafo_vazio(TipoGrafo *Grafo) {
-    char codigos[32][8] = {"CIC0003", "CIC0004", "CIC0142", "MAT0025",
-    "CIC0002", "CIC0090", "CIC0229", "CIC0231",
-    "MAT0026", "MAT0031", "CIC0098", "CIC0197",
-    "EST0023", "MAT0034", "MAT0053", "CIC0124",
-    "CIC0182", "CIC0198", "CIC0199", "CIC0093",
-    "CIC0097", "CIC0105", "CIC0135", "CIC0202",
-    "CIC0101", "CIC0104", "CIC0161", "CIC0203",
-    "CIC0205", "CIC0189", "CIC0201", "CIC0204"};
+    char codigos[32][7] = {"113468", "113476", "116726", "113034",
+    "113450", "116319", "129011", "129020",
+    "113042", "113093", "116394", "117889",
+    "115045", "113107", "113417", "116572",
+    "117366", "117897", "117901", "116343",
+    "116378", "116441", "116653", "117935",
+    "116416", "116432", "116882", "117943",
+    "117960", "117536", "117927", "117951"};
+    char nomes[32][42] = {"INTRODUCAO AOS SISTEMAS COMPUTACIONAIS", "ALGORITMOS E PROGRAMACAO DE COMPUTADORES", "INFORMATICA E SOCIEDADE", "CALCULO 1",
+    "FUNDAMENTOS TEORICOS DA COMPUTACAO", "ESTRUTURAS DE DADOS", "CIRCUITOS LOGICOS", "LABORATORIO DE CIRCUITOS LOGICOS", "CALCULO 2",
+    "INTRODUCAO A ALGEBRA LINEAR", "ORGANIZACAO E ARQUITETURA DE COMPUTADORES", "TECNICAS DE PROGRAMACAO 1", "PROBABILIDADE E ESTATISTICA",
+    "ALGEBRA 1", "CALCULO NUMERICO", "REDES DE COMPUTADORES",
+    "LOGICA COMPUTACIONAL 1", "TECNICAS DE PROGRAMACAO 2", "TEORIA E APLICACAO DE GRAFOS",
+    "LINGUAGENS DE PROGRAMACAO", "BANCOS DE DADOS", "ENGENHARIA DE SOFTWARE",
+    "INTRODUCAO A INTELIGENCIA ARTIFICIAL", "PROGRAMACAO CONCORRENTE", "SISTEMAS DE INFORMACAO", "SOFTWARE BASICO",
+    "AUTOMATOS E COMPUTABILIDADE", "COMPUTACAO EXPERIMENTAL", "FUNDAMENTOS DE SISTEMAS OPERACIONAIS",
+    "PROJETO E ANALISE DE ALGORITMOS", "SEGURANCA COMPUTACIONAL", "COMPILADORES"};   
     int pesos[32] = {4, 6, 2, 6, 4, 4, 4, 2, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4};
     for(int i = 0; i < Grafo->NumVertices; i++)
-        cria_lista_vazia(&Grafo->Adj[i], codigos[i], pesos[i], i);
+        cria_lista_vazia(&Grafo->Adj[i], codigos[i], pesos[i], i, nomes[i]);
 }
 
 /*Função que insere os valores respectivos a cada aresta*/
@@ -39,36 +49,36 @@ void insere_aresta(int id, char codigo[], int peso, TipoLista *Lista) {
 
 /*Função que realiza chamadas com os valores para serem armazenados nas arestas*/
 void monta_grafo(TipoGrafo *Grafo) {
-    insere_aresta(5, "CIC0090", 4, &Grafo->Adj[1]);
-    insere_aresta(6, "CIC0229", 4, &Grafo->Adj[1]);
-    insere_aresta(7, "CIC0231", 2, &Grafo->Adj[1]);
-    insere_aresta(8, "MAT0026", 6, &Grafo->Adj[3]);
-    insere_aresta(10, "CIC0098", 4, &Grafo->Adj[6]);
-    insere_aresta(10, "CIC0098", 4, &Grafo->Adj[7]);
-    insere_aresta(11, "CIC0197", 4, &Grafo->Adj[5]);
-    insere_aresta(12, "EST0023", 4, &Grafo->Adj[3]);
-    insere_aresta(14, "MAT0026", 4, &Grafo->Adj[8]);
-    insere_aresta(15, "CIC0124", 4, &Grafo->Adj[5]);
-    insere_aresta(16, "CIC0182", 4, &Grafo->Adj[5]);
-    insere_aresta(17, "CIC0198", 4, &Grafo->Adj[11]);
-    insere_aresta(18, "CIC0199", 4, &Grafo->Adj[5]);
-    insere_aresta(19, "CIC0093", 4, &Grafo->Adj[5]);
-    insere_aresta(21, "CIC0105", 4, &Grafo->Adj[11]);
-    insere_aresta(22, "CIC0135", 4, &Grafo->Adj[5]);
-    insere_aresta(23, "CIC0202", 4, &Grafo->Adj[10]);
-    insere_aresta(23, "CIC0202", 4, &Grafo->Adj[17]);
-    insere_aresta(24, "CIC0101", 4, &Grafo->Adj[5]);
-    insere_aresta(25, "CIC0104", 4, &Grafo->Adj[5]);
-    insere_aresta(26, "CIC0161", 6, &Grafo->Adj[13]);
-    insere_aresta(27, "CIC0203", 4, &Grafo->Adj[12]);
-    insere_aresta(27, "CIC0203", 4, &Grafo->Adj[5]);
-    insere_aresta(28, "CIC0205", 4, &Grafo->Adj[23]);
-    insere_aresta(29, "CIC0189", 4, &Grafo->Adj[3]);
-    insere_aresta(29, "CIC0189", 4, &Grafo->Adj[5]);
-    insere_aresta(30, "CIC0201", 4, &Grafo->Adj[15]);
-    insere_aresta(31, "CIC0204", 4, &Grafo->Adj[19]);
-    insere_aresta(31, "CIC0204", 4, &Grafo->Adj[25]);
-    insere_aresta(31, "CIC0204", 4, &Grafo->Adj[26]);
+    insere_aresta(5, "116319", 4, &Grafo->Adj[1]);
+    insere_aresta(6, "129011", 4, &Grafo->Adj[1]);
+    insere_aresta(7, "129020", 2, &Grafo->Adj[1]);
+    insere_aresta(8, "113042", 6, &Grafo->Adj[3]);
+    insere_aresta(10, "116394", 4, &Grafo->Adj[6]);
+    insere_aresta(10, "116394", 4, &Grafo->Adj[7]);
+    insere_aresta(11, "117889", 4, &Grafo->Adj[5]);
+    insere_aresta(12, "115045", 4, &Grafo->Adj[3]);
+    insere_aresta(14, "113417", 4, &Grafo->Adj[8]);
+    insere_aresta(15, "116572", 4, &Grafo->Adj[5]);
+    insere_aresta(16, "117366", 4, &Grafo->Adj[5]);
+    insere_aresta(17, "117897", 4, &Grafo->Adj[11]);
+    insere_aresta(18, "117901", 4, &Grafo->Adj[5]);
+    insere_aresta(19, "116343", 4, &Grafo->Adj[5]);
+    insere_aresta(21, "116441", 4, &Grafo->Adj[11]);
+    insere_aresta(22, "116653", 4, &Grafo->Adj[5]);
+    insere_aresta(23, "117935", 4, &Grafo->Adj[10]);
+    insere_aresta(23, "117935", 4, &Grafo->Adj[17]);
+    insere_aresta(24, "116416", 4, &Grafo->Adj[5]);
+    insere_aresta(25, "116432", 4, &Grafo->Adj[5]);
+    insere_aresta(26, "116882", 6, &Grafo->Adj[13]);
+    insere_aresta(27, "117943", 4, &Grafo->Adj[12]);
+    insere_aresta(27, "117943", 4, &Grafo->Adj[5]);
+    insere_aresta(28, "117960", 4, &Grafo->Adj[23]);
+    insere_aresta(29, "117536", 4, &Grafo->Adj[3]);
+    insere_aresta(29, "117536", 4, &Grafo->Adj[5]);
+    insere_aresta(30, "117927", 4, &Grafo->Adj[15]);
+    insere_aresta(31, "117951", 4, &Grafo->Adj[19]);
+    insere_aresta(31, "117951", 4, &Grafo->Adj[25]);
+    insere_aresta(31, "117951", 4, &Grafo->Adj[26]);
 }
 
 void monta_grafo_reverso(TipoGrafo *Grafo, TipoGrafo *Reverso) {
@@ -247,6 +257,33 @@ void algoritmo_backflow(TipoGrafo *Grafo, TipoGrafo *Reverso, int graus_saida[],
     LiberaLISTA(caminho_critico);
 }
 
+void cria_dot(TipoGrafo *Grafo, int tres_CC[3][6]) {
+    FILE *arq = fopen("grafo.dot", "w");
+    if(arq == NULL) {
+        printf("Erro ao criar o arquivo\n");
+    }
+
+    fprintf(arq, "digraph projeto {\n");
+    
+    Apontador aux;
+    for(int i = 0; i < 32; i++) {
+        aux = Grafo->Adj[i].Primeiro->Prox;
+        if(aux == NULL) {
+            fprintf(arq, "\t%s;\n", Grafo->Adj[i].Codigo_Vertice);
+        }
+        else {
+            while(aux != NULL) {
+                fprintf(arq, "\t%s -> %s;\n", Grafo->Adj[i].Codigo_Vertice, aux->Codigo);   
+                aux = aux->Prox;
+            }
+        }
+       
+    }
+
+    fprintf(arq, "}");
+    fclose(arq);
+}
+
 /*Função responsável por liberar a memória alocada pelo DAG*/
 void libera_grafo(TipoGrafo *Grafo) {
     Apontador anterior, aux;
@@ -262,16 +299,6 @@ void libera_grafo(TipoGrafo *Grafo) {
     }
 }
 
-void gera_dot(TipoGrafo *Grafo) {
-    FILE *arq = fopen("grafo.dot", "w");
-    if(arq == NULL) {
-        printf("Erro ao criar o arquivo\n");
-    }
-    
-
-    fclose(arq);
-}
-
 int main(){
 
     TipoGrafo Grafo;
@@ -284,8 +311,13 @@ int main(){
 
     monta_grafo(&Grafo);
 
-    printf("\n\n-----BACHARELADO EM CIENCIA DA COMPUTACAO-----\n\n------DAG------\n");
+    printf("\n\n-----BACHARELADO EM CIENCIA DA COMPUTACAO-----\n\n------CURSOS E SEUS CODIGOS------\n");
 
+    for(int i = 0; i < 32; i++){
+        printf("CURSO: %s\nCODIGO: %s\n\n", Grafo.Adj[i].Nome_Vertice, Grafo.Adj[i].Codigo_Vertice);
+    }
+
+    printf("\n------DAG------\n\n");
     imprime_grafo(&Grafo);
 
     encontra_grau(&Grafo, graus_chegada, graus_saida);
@@ -309,18 +341,20 @@ int main(){
         tres_PC[i] = 0;
     }
 
-    printf("\n---TRES MAIORES CAMINHOS CRITICOS COM VERTICES DIFERENTES---\n\n");
+    printf("\n\n---TRES MAIORES CAMINHOS CRITICOS COM VERTICES DIFERENTES---\n\nCODIGO PESO\n");
 
     algoritmo_backflow(&Grafo, &Grafo_Reverso, graus_saida, tres_PC, tres_CC);
 
     for(int i = 0; i < 3; i++) {
         for(int j = 0; j < 6; j++) {
             if(tres_CC[i][j] != 0) {
-                printf("%s%d ", j != 0 ? "<- " : "", tres_CC[i][j]);
+                printf("%s%s %d ", j != 0 ? "<- " : "", Grafo.Adj[tres_CC[i][j]].Codigo_Vertice, Grafo.Adj[tres_CC[i][j]].Peso_Vertice);
             }
         }
-        printf("Peso total: %d\n", tres_PC[i]);
+        printf("\tPeso total: %d\n", tres_PC[i]);
     }
+
+    cria_dot(&Grafo, tres_CC);
     
     libera_grafo(&Grafo);
 
