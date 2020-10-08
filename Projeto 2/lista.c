@@ -1,5 +1,6 @@
 #include "lista.h"
 
+// Função que cria uma nova lista
 LISTA ** CriaIniciaLISTA(){
 	LISTA **novo;
 
@@ -10,6 +11,7 @@ LISTA ** CriaIniciaLISTA(){
 	return novo;
 }
 
+// Verifica se exite uma lista
 int ExisteLISTA(LISTA **inicio){
 	if(inicio == NULL)
 		return 0;
@@ -17,6 +19,7 @@ int ExisteLISTA(LISTA **inicio){
 	return 1;
 }
 
+// Verifica se a lista é vazia
 int ehVaziaLISTA(LISTA **inicio){
 	if(*inicio == NULL)
 		return 1;
@@ -24,6 +27,7 @@ int ehVaziaLISTA(LISTA **inicio){
 	return 0;
 }
 
+// Insere um novo elemento no início da lista
 int InsereInicioLISTA(LISTA **inicio, int novo){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -48,6 +52,7 @@ int InsereInicioLISTA(LISTA **inicio, int novo){
 	return 1;
 }
 
+// Insere um novo elemento no final da lista
 int InsereFinalLISTA(LISTA **inicio, int novo){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -79,6 +84,7 @@ int InsereFinalLISTA(LISTA **inicio, int novo){
 	return 1;
 }
 
+// Retorna um elemento em determinada posição
 int PosicaoLISTA(LISTA **inicio, int posicao){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -103,6 +109,7 @@ int PosicaoLISTA(LISTA **inicio, int posicao){
 	return -1;
 }
 
+// Retorna a posição de um elemento
 int BuscaLISTA(LISTA **inicio, int elemento){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -128,6 +135,7 @@ int BuscaLISTA(LISTA **inicio, int elemento){
 	return 0;
 }
 
+// Remove o elemento do início da lista
 int RemoveInicioLISTA(LISTA **inicio){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -146,6 +154,7 @@ int RemoveInicioLISTA(LISTA **inicio){
 	return 1;
 }
 
+// Remove o elemento no final da lista
 int RemoveFinalLISTA(LISTA **inicio){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -176,6 +185,7 @@ int RemoveFinalLISTA(LISTA **inicio){
 	return 1;
 }
 
+// Imprime a lista
 void ImprimeLISTA(LISTA **inicio){
 	if(ExisteLISTA(inicio) == 0){
 		printf("Erro! Lista nao existe.");
@@ -199,6 +209,7 @@ void ImprimeLISTA(LISTA **inicio){
 	printf("\n");
 }
 
+// Remove todos os elementos da lista
 void LimpaLISTA(LISTA **inicio){
 	if(ehVaziaLISTA(inicio) == 1)
 		return;
@@ -221,6 +232,7 @@ void LimpaLISTA(LISTA **inicio){
 	*inicio = NULL;
 }
 
+// Remove os elementos da lista e libera a lista
 void LiberaLISTA(LISTA **inicio){
 
 	if(ExisteLISTA(inicio) == 0)

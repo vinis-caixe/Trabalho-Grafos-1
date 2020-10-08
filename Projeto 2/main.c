@@ -1,19 +1,28 @@
+/*
+Trabalho 2 de Teoria e Aplicação de Grafos
+Pedro Vitor Valença Mizuno - 17/0043665
+Vinícius Caixeta de Souza - 18/0132199
+*/
+
+// Parte do código de montagem do dígrafo utilizado veio do link fornecido pelo professor: http://www2.dcc.ufmg.br/livros/algoritmos-edicao2/cap7/codigo/c/7.4a7.5e7.8-grafolistaap.c
+
+
 #include "fila.h"
 #include "lista.h"
 #include <string.h>
 
-/*Função responsável por criar as listas de adjacências*/
+/*Função responsável por criar os vértices do dígrafo e armazenar informações deles*/
 void cria_lista_vazia(TipoLista *Lista, char codigo[], int peso, int id, char nome[]) {
     Lista->Primeiro = (Apontador) malloc (sizeof(Celula));
     Lista->Ultimo = Lista->Primeiro;
     strcpy(Lista->Codigo_Vertice, codigo);    // Armazenamos o código da disciplina
     Lista->Peso_Vertice = peso;
     Lista->Id_Vertice = id;
-    strcpy(Lista->Nome_Vertice, nome);
+    strcpy(Lista->Nome_Vertice, nome);  // Armazenamos o nome da disciplina
     Lista->Primeiro->Prox = NULL;
 }
 
-/*Função responsável por criar o grafo, enviando o código da disciplina para identificação*/
+/*Função responsável por criar o grafo, enviando o código, nome e peso da disciplina para identificação*/
 void cria_grafo_vazio(TipoGrafo *Grafo) {
     char codigos[32][7] = {"113468", "113476", "116726", "113034",
     "113450", "116319", "129011", "129020",
@@ -81,9 +90,10 @@ void monta_grafo(TipoGrafo *Grafo) {
     insere_aresta(31, "117951", 4, &Grafo->Adj[26]);
 }
 
+/*Função responsável por fazer o grafo reverso baseado no original*/
 void monta_grafo_reverso(TipoGrafo *Grafo, TipoGrafo *Reverso) {
     Apontador aux;
-    for(int i = 0; i < 32; i++) {
+    for(int i = 0; i < Grafo->NumVertices; i++) {
         aux = Grafo->Adj[i].Primeiro->Prox;
         while(aux != NULL){
             insere_aresta(i, Grafo->Adj[i].Codigo_Vertice, Grafo->Adj[i].Peso_Vertice, &Reverso->Adj[aux->Id]);
@@ -112,12 +122,12 @@ void imprime_grafo(TipoGrafo *Grafo) {
 void encontra_grau(TipoGrafo *Grafo, int graus_chegada[], int graus_saida[]) {
     Apontador aux;
     int i;
-    for(i = 0; i < 32; i++){
+    for(i = 0; i < Grafo->NumVertices; i++){
         graus_chegada[i] = 0;   // Vetores de 32 espaços armazenando o grau de entrada e saída dos 32 vértices
         graus_saida[i] = 0;
     }
 
-    for(i = 0; i < 32; i++) {
+    for(i = 0; i < Grafo->NumVertices; i++) {
         aux = Grafo->Adj[i].Primeiro->Prox;
         while(aux != NULL) {
             graus_chegada[aux->Id]++;   // Aumenta o grau de chegada do vértice a medida que encontra adjacências
@@ -135,7 +145,7 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus_chegada[]) {
     fila = criaFILA();
 
     // Se o grau de chegada do vértice for 0 ele é colocado no final da fila
-    for(i = 0; i < 32; i++) {
+    for(i = 0; i < Grafo->NumVertices; i++) {
         if(graus_chegada[i] == 0) {
             enfileirar(fila, Grafo->Adj[i]);
             graus_chegada[i] = -1;  // Marca como já enfileirado
@@ -147,9 +157,9 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus_chegada[]) {
     while(!ehVaziaFILA(fila)){  // Se a fila não for vazia
         TipoLista vertice_removido = primeiroFILA(fila);
         desenfileirar(fila);
-        printf("%s\n", vertice_removido.Codigo_Vertice);  // Remove o primeiro da fila e printa seu código
+        printf("%s\t%s\n", vertice_removido.Codigo_Vertice, Grafo->Adj[vertice_removido.Id_Vertice].Nome_Vertice);  // Remove o primeiro da fila e printa seu código
         contador++;
-        for(i = 0; i < 32; i++) {
+        for(i = 0; i < Grafo->NumVertices; i++) {
             if(!(strcmp(vertice_removido.Codigo_Vertice, Grafo->Adj[i].Codigo_Vertice))){   // Se o código do removido for igual ao código do vértice agora testado
                 aux = Grafo->Adj[i].Primeiro->Prox;
                 while(aux != NULL) {
@@ -165,87 +175,92 @@ void algoritmo_Kahn(TipoGrafo *Grafo, int graus_chegada[]) {
         }
     }
 
-    if(contador != 32)
+    if(contador != Grafo->NumVertices)
         printf("Nao eh possivel ter uma ordem topologica\n");
     
     liberaFILA(fila);
 }
 
+/*Função responsável por encontrar os 3 maiores caminhos críticos com todos os vértices diferentes.
+tres_CC armazena os ids do vetores que compõem os 3 maiores caminhos críticos.
+tres_PC armazena os pesos totais dos 3 maiores caminhos críticos*/
 void tres_caminhos_criticos(LISTA **caminho_critico, int peso_critico, int tres_PC[], int tres_CC[3][6]) {
     int vertices_CC[18], k, repete = -1, i, menor_PC = 99, menor_i;
     for(i = 0; i < 3; i++) {
         for(int j = 0; j < 6; j++) {
-            vertices_CC[6*i + j] = tres_CC[i][j];
+            vertices_CC[6*i + j] = tres_CC[i][j];   // Armazena a matriz em um vetor
         }
     }
     for(i = 0; i < 18; i++) {
         k = 0;
         while(PosicaoLISTA(caminho_critico, k) != -1) {
             if(vertices_CC[i] == PosicaoLISTA(caminho_critico, k)) {
-                repete = i;
+                repete = i; // Armazena em repete a posição do vértice repetido, se houver
             }
             k++;
         }
     }
-    if(repete == -1) {  // se nao repete
+    if(repete == -1) {  // Se não há repetição
         for(i = 0; i < 3; i++) {
             if(menor_PC > tres_PC[i]) {
-                menor_PC = tres_PC[i];
+                menor_PC = tres_PC[i];  // Encontra o menor peso dos 3 caminhos críticos
                 menor_i = i;
             }
         }
         for(i = 0; i < 6; i++) {
-            if(PosicaoLISTA(caminho_critico, i) != -1) {
+            if(PosicaoLISTA(caminho_critico, i) != -1) {    // Atualiza no vetor o novo caminho crítico
                 vertices_CC[6*menor_i + i] = PosicaoLISTA(caminho_critico, i);
             } else
-                vertices_CC[6*menor_i + i] = 0;
+                vertices_CC[6*menor_i + i] = 0; // Coloca 0 se o caminho crítico já acabou
         }
-        tres_PC[menor_i] = peso_critico;
-    } else {
-        if(tres_PC[repete/6] < peso_critico) {
+        tres_PC[menor_i] = peso_critico;    // Atualiza o peso do novo caminho crítico
+    } else {    // Se há repetição
+        if(tres_PC[repete/6] < peso_critico) { // Compara se o peso do caminho crítico na matriz é menor que o peso do caminho crítico que estamos analisando agora
             tres_PC[repete/6] = peso_critico;
             for(i = 0; i < 6; i++) {
-                if(PosicaoLISTA(caminho_critico, i) != -1) {
+                if(PosicaoLISTA(caminho_critico, i) != -1) {    // Atualiza no vetor o novo caminho crítico
                     vertices_CC[(repete-(repete%6)) + i] = PosicaoLISTA(caminho_critico, i);
                 }
                 else
-                    vertices_CC[(repete-(repete%6)) + i] = 0;
+                    vertices_CC[(repete-(repete%6)) + i] = 0;   // Coloca 0 se o caminho crítico já acabou
             }
         }
     }
-    for(i = 0; i < 3; i++) {
+    for(i = 0; i < 3; i++) {    // Reenvia para a matriz os novos valores de vetor
         for(int j = 0; j < 6; j++) {
             tres_CC[i][j] = vertices_CC[6*i + j];
         }
     }
 }
 
+/*Função que realiza chamadas recursivas para encontrar os caminhos criticos a partir de um vértice terminal*/
 void recursao_backflow(TipoGrafo *Reverso, TipoLista Vertice, int peso_critico, int peso_local, LISTA **caminho_critico, int tres_PC[], int tres_CC[3][6]) {
     Apontador aux;
-    if(Vertice.Primeiro->Prox == NULL && peso_local > peso_critico) {
+    if(Vertice.Primeiro->Prox == NULL && peso_local > peso_critico) {   // Se for um vértice inicial e for o caminho crítico com maior peso desse vértice terminal
         peso_critico = peso_local;
-        tres_caminhos_criticos(caminho_critico, peso_critico, tres_PC, tres_CC);
+        tres_caminhos_criticos(caminho_critico, peso_critico, tres_PC, tres_CC);    // Atualiza a matriz dos 3 maiores caminhos críticos com vetores diferentes
     } else {
         aux = Vertice.Primeiro->Prox;
-        while(aux != NULL) {
-            peso_local += aux->Peso;
-            InsereFinalLISTA(caminho_critico, aux->Id);
+        while(aux != NULL) {    // Enquanto houver adjacentes
+            peso_local += aux->Peso;    // Incrementa o peso do caminho pelo peso do vértice atual
+            InsereFinalLISTA(caminho_critico, aux->Id); // Insere o id do vértice na lista do caminho crítico
             recursao_backflow(Reverso, Reverso->Adj[aux->Id], peso_critico, peso_local, caminho_critico, tres_PC, tres_CC);
             aux = aux->Prox;
-            peso_local -= Vertice.Peso_Vertice;
-            RemoveFinalLISTA(caminho_critico);
+            peso_local -= Vertice.Peso_Vertice; // Decrementa o peso do caminho
+            RemoveFinalLISTA(caminho_critico);  // Remove da lista o id do vértice
         }
     }
     peso_local -= Vertice.Peso_Vertice;
 }
 
+/*Função baseada no algoritmo backflow para encontrar caminhos críticos*/
 void algoritmo_backflow(TipoGrafo *Grafo, TipoGrafo *Reverso, int graus_saida[], int tres_PC[], int tres_CC[3][6]) {
     int peso_critico = 0, peso_local = 0;
-    LISTA **caminho_critico;
+    LISTA **caminho_critico;    // Cria uma lista para armazenar os vértices do caminho crítico
     caminho_critico = CriaIniciaLISTA();
-    for(int i = 0; i < 32; i++) {
-        if(graus_saida[i] == 0) {   // Se é um dos vértices finais
-            peso_local += Reverso->Adj[i].Peso_Vertice;
+    for(int i = 0; i < Grafo->NumVertices; i++) {
+        if(graus_saida[i] == 0) {   // Se for um dos vértices finais (grau de saída 0)
+            peso_local += Reverso->Adj[i].Peso_Vertice; // Incrementa o peso
             InsereFinalLISTA(caminho_critico, Reverso->Adj[i].Id_Vertice);
             recursao_backflow(Reverso, Reverso->Adj[i], peso_critico, peso_local, caminho_critico, tres_PC, tres_CC);
             RemoveFinalLISTA(caminho_critico);
@@ -257,7 +272,10 @@ void algoritmo_backflow(TipoGrafo *Grafo, TipoGrafo *Reverso, int graus_saida[],
     LiberaLISTA(caminho_critico);
 }
 
+/*Função responsável por gerar o arquivo dot */
 void cria_dot(TipoGrafo *Grafo, int tres_CC[3][6]) {
+    char cores[3][6] = {"red", "blue", "green"};    // Cada cor representa um dos três caminhos críticos
+    int flag_cor = 0;
     FILE *arq = fopen("grafo.dot", "w");
     if(arq == NULL) {
         printf("Erro ao criar o arquivo\n");
@@ -266,14 +284,26 @@ void cria_dot(TipoGrafo *Grafo, int tres_CC[3][6]) {
     fprintf(arq, "digraph projeto {\n");
     
     Apontador aux;
-    for(int i = 0; i < 32; i++) {
+    for(int i = 0; i < Grafo->NumVertices; i++) {
         aux = Grafo->Adj[i].Primeiro->Prox;
         if(aux == NULL) {
-            fprintf(arq, "\t%s;\n", Grafo->Adj[i].Codigo_Vertice);
+            fprintf(arq, "\t%s;\n", Grafo->Adj[i].Codigo_Vertice);  // Se um vértice não ter adjacentes imprimí-lo sozinho
         }
         else {
             while(aux != NULL) {
-                fprintf(arq, "\t%s -> %s;\n", Grafo->Adj[i].Codigo_Vertice, aux->Codigo);   
+                flag_cor = 0;
+                fprintf(arq, "\t%s -> %s", Grafo->Adj[i].Codigo_Vertice, aux->Codigo);   // Imprime os vértices de uma aresta no arquivo
+                for(int j = 0; j < 3; j++){     // j representa um dos três possíveis caminhos críticos
+                    for(int k = 0; k < 5; k++){
+                        if(aux->Id == tres_CC[j][k] && Grafo->Adj[i].Id_Vertice == tres_CC[j][k+1]){    // Se um vértice e seu adjacente estiverem juntos em um dos
+                            fprintf(arq, " [color=%s];\n", cores[j]);                                   // três caminhos críticos, determinar uma cor para sua respectiva
+                            flag_cor = 1;                                                               // aresta no arquivo
+                        }                                                           
+                        
+                    }
+                }
+                if(flag_cor == 0)
+                    fprintf(arq, ";\n");
                 aux = aux->Prox;
             }
         }
@@ -305,15 +335,15 @@ int main(){
     Grafo.NumVertices = 32;
     Grafo.NumArestas = 30;
     
-    int graus_chegada[32], graus_saida[32];
+    int graus_chegada[Grafo.NumVertices], graus_saida[Grafo.NumVertices];
 
     cria_grafo_vazio(&Grafo);
 
     monta_grafo(&Grafo);
 
-    printf("\n\n-----BACHARELADO EM CIENCIA DA COMPUTACAO-----\n\n------CURSOS E SEUS CODIGOS------\n");
+    printf("\n\n--------BACHARELADO EM CIENCIA DA COMPUTACAO--------\n\n\n------CURSOS E SEUS CODIGOS------\n\n");
 
-    for(int i = 0; i < 32; i++){
+    for(int i = 0; i < Grafo.NumVertices; i++){
         printf("CURSO: %s\nCODIGO: %s\n\n", Grafo.Adj[i].Nome_Vertice, Grafo.Adj[i].Codigo_Vertice);
     }
 
@@ -327,9 +357,12 @@ int main(){
 
     encontra_grau(&Grafo, graus_chegada, graus_saida);
 
+    // O grafo reverso foi criado para ter uma maior facilidade
+    // ao acessar os adjacentes por chegada de um dado vértice
+    // durante a execução do algoritmo backflow
     TipoGrafo Grafo_Reverso;
-    Grafo_Reverso.NumVertices = 32;
-    Grafo_Reverso.NumArestas = 30;
+    Grafo_Reverso.NumVertices = Grafo.NumVertices;
+    Grafo_Reverso.NumArestas = Grafo.NumArestas;
     
     cria_grafo_vazio(&Grafo_Reverso);
     monta_grafo_reverso(&Grafo, &Grafo_Reverso);

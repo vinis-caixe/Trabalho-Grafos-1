@@ -1,5 +1,6 @@
 #include "fila.h"
 
+// Cria uma nova fila
 FILA** criaFILA() {
     FILA **novo;
 
@@ -10,6 +11,7 @@ FILA** criaFILA() {
     return novo;
 }
 
+// Verifica se a fila é vazia
 int ehVaziaFILA(FILA **inicio) {
 
     if(*inicio == NULL) {
@@ -69,6 +71,7 @@ int desenfileirar(FILA **inicio) {
     return 1;
 }
 
+// Remove todos os nós da fila e a libera
 void liberaFILA(FILA **inicio) {
     while(ehVaziaFILA(inicio) != 1)
     	desenfileirar(inicio);
@@ -78,6 +81,7 @@ void liberaFILA(FILA **inicio) {
 
 }
 
+// Remove todos os nós da fila
 void limparFILA(FILA **inicio) {
 
     while(ehVaziaFILA(inicio) != 1)
