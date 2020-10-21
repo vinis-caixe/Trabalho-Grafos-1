@@ -3,11 +3,16 @@ Departamento de Ciência da Computação - UnB
 Pedro Vitor Valença Mizuno - 17/0043665
 Vinícius Caixeta de Souza - 18/0132199
 
-O programa todo está na main.c e foi feito no Linux Ubuntu e compilado no GCC versão 8.4.0.
+O programa possui os arquivos main.c, fila.c, fila.h, lista.c e lista.h e foi feito no Linux Ubuntu e compilado no GCC versão 8.4.0.
+
 Compilar:
-gcc main.c -o main
+gcc main.c fila.c lista.c -o main
+
 Executar:
 ./main
 
-O arquivo com os dados utilizados para montar o grafo tem como nome:
-disciplinas.txt
+Como tivemos problemas na utilização das bibliotecas gráficas, criamos nossa própria função para gerar o arquivo .dot .
+O código dot, de nome grafo.dot, é gerado após a execução da main.
+Para gerar a imagem do dígrafo, utilize esse comando:
+dot -Tpng grafo.dot -o grafo.png
+Com esse comando, a imagem grafo.png é gerada.
