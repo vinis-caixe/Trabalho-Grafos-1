@@ -138,7 +138,7 @@ void leitura_arq_hab(int habilitacoes[]) {
 
 void leitura_arq_arestas(TipoGrafo *Grafo) {
     char linha[110];
-    int i, num_e, pos_e[4], contador_escola = 101, escola = 0;    
+    int i, num_e, escola = 0;    
     FILE *arq = fopen("entradaProj3TAG.txt", "r");
 
     if(arq == NULL){
@@ -148,8 +148,6 @@ void leitura_arq_arestas(TipoGrafo *Grafo) {
 
     int id = 1;
     while(!feof(arq)) {
-        for(i = 0; i < 4; i++)
-            pos_e[i] = 0;
         i = 0;
 
         fgets(linha, 110, arq);
@@ -158,7 +156,6 @@ void leitura_arq_arestas(TipoGrafo *Grafo) {
             num_e = 0;
             while(linha[i] != '\0') {
                 if(linha[i] == 'E') {
-                    pos_e[num_e] = i;
                     num_e++;
                     if(linha[i+2] >= '0' && linha[i+2] <= '9'){
                         escola = ((int)linha[i+1] - 48) * 10;
@@ -182,30 +179,43 @@ void gale_shapley(TipoGrafo *Grafo) {
     LISTA **combinacoes;
     combinacoes = CriaIniciaLISTA();
     Apontador aux_free;
-    int algum_livre = 1, cont = 0, id_escola, oi = 0, hab1, hab2, hab_prof;
+    int algum_livre = 1, cont = 0, id_escola, hab1, hab2, hab_prof, id_prof_removido1, id_prof_removido2, algum_com_proposta = 1;
+    while(algum_livre == 1 && algum_com_proposta == 1) {
 
-    while(algum_livre == 1/*cont < 100*/) {
+        if(Grafo->Adj[cont].Livre != 0 || Grafo->Adj[cont].Primeiro->Prox != NULL) {    // mudei de && pra ||
+            id_escola = Grafo->Adj[cont].Primeiro->Prox->Id_Adjacente;
+            hab1 = Grafo->Adj[id_escola-1].Habilitacao;
+            hab2 = Grafo->Adj[id_escola-1].Segunda_Habilitacao;
+            hab_prof = Grafo->Adj[cont].Habilitacao;
+            id_prof_removido1 = ProfessorLISTA(combinacoes, id_escola, 1);
+            id_prof_removido2 = ProfessorLISTA(combinacoes, id_escola, 2);
 
-        id_escola = Grafo->Adj[cont].Primeiro->Prox->Id_Adjacente;
-        hab1 = Grafo->Adj[id_escola-1].Habilitacao;
-        hab2 = Grafo->Adj[id_escola-1].Segunda_Habilitacao;
-        hab_prof = Grafo->Adj[cont].Habilitacao;
-        if(Grafo->Adj[cont].Livre != 0) {
             if(Grafo->Adj[id_escola-1].Livre > 0) {
-                InsereFinalLISTA(combinacoes, cont+1, id_escola);
+                if(id_prof_removido1 != -1 && Grafo->Adj[id_prof_removido1 - 1].Habilitacao != hab1 && hab_prof == hab1)
+                    InsereInicioLISTA(combinacoes, cont+1, id_escola);
+                else
+                    InsereFinalLISTA(combinacoes, cont+1, id_escola);
                 ImprimeLISTA(combinacoes);
                 Grafo->Adj[id_escola-1].Livre--;
                 Grafo->Adj[cont].Livre = 0;
-            }/* else if(hab_prof == hab1 && Grafo->Adj[ProfessorLISTA(combinacoes, id_escola) - 1].Habilitacao != hab1){
-                int id_prof_removido = ProfessorLISTA(combinacoes, id_escola);
-                RemoveBuscaLISTA(combinacoes, id_prof_removido, id_escola);
-                InsereFinalLISTA(combinacoes, cont+1, id_escola);
+
+            } else if(hab_prof == hab1 && Grafo->Adj[id_prof_removido1 - 1].Habilitacao != hab1){   // tirar ou não hab_prof == hab1 e no hab2
+                TrocaProfessorLISTA(combinacoes, id_escola, id_prof_removido1, cont+1);
                 Grafo->Adj[cont].Livre = 0;
-                Grafo->Adj[id_prof_removido-1].Livre = 1;
-                aux_free = Grafo->Adj[id_prof_removido-1].Primeiro->Prox;
-                Grafo->Adj[id_prof_removido-1].Primeiro->Prox = aux_free->Prox;
+                Grafo->Adj[id_prof_removido1-1].Livre = 1;
+                aux_free = Grafo->Adj[id_prof_removido1 - 1].Primeiro->Prox;
+                Grafo->Adj[id_prof_removido1 - 1].Primeiro->Prox = aux_free->Prox;
                 free(aux_free);
-            }*/ else {            // ESTOU COM A IDEIA DE TALVEZ COLOCAR O ID DOS PROFESSORES CONTRATADOS PROVISORIAMENTE NO VÉRTICE DAS ESCOLAS E VICE-VERSA
+
+            } else if(hab_prof == hab2 && (id_prof_removido2 != -1) && (Grafo->Adj[id_prof_removido2 - 1].Habilitacao != hab2)) {
+                TrocaProfessorLISTA(combinacoes, id_escola, id_prof_removido2, cont+1);
+                Grafo->Adj[cont].Livre = 0;
+                Grafo->Adj[id_prof_removido2 - 1].Livre = 1;
+                aux_free = Grafo->Adj[id_prof_removido2 - 1].Primeiro->Prox;
+                Grafo->Adj[id_prof_removido2 - 1].Primeiro->Prox = aux_free->Prox;
+                free(aux_free);
+
+            } else {
                 aux_free = Grafo->Adj[cont].Primeiro->Prox;
                 Grafo->Adj[cont].Primeiro->Prox = aux_free->Prox;
                 free(aux_free);
@@ -215,65 +225,17 @@ void gale_shapley(TipoGrafo *Grafo) {
         }
 
         algum_livre = 0;
+        algum_com_proposta = 0;
         for(int i = 0; i < 100; i++) {
             if(Grafo->Adj[i].Livre > 0)
                 algum_livre = 1;
+            if(Grafo->Adj[i].Primeiro->Prox != NULL)
+                algum_com_proposta = 1;
         }
         cont++;
         if(cont == 100)
             cont = 0;
     }
-    /*
-    int professor, escola, algum_livre = 1, algum_com_proposta = 1, i = 0;
-    TipoLista aux;
-    Apontador aux_free;
-
-    while(algum_livre && algum_com_proposta){
-        i = 0;
-        while(i < 100) {
-            aux = Grafo->Adj[i];
-            if(aux.Primeiro != aux.Ultimo && Grafo->Adj[i].Livre == 1) {
-                escola = aux.Primeiro->Prox->Id_Adjacente;
-                if(Grafo->Adj[escola-1].Livre > 0) {
-                    InsereFinalLISTA(combinacoes, i+1, escola);    // Estamos colocando a POSICAO NA LISTA DE ADJ não o id deles de verdade (que é +1)
-                    Grafo->Adj[escola-1].Livre--;
-                    Grafo->Adj[i].Livre = 0;
-                    ImprimeLISTA(combinacoes);
-                } else if (aux.Habilitacao == Grafo->Adj[escola-1].Habilitacao && Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Habilitacao != Grafo->Adj[escola-1].Habilitacao) {
-                    RemoveBuscaLISTA(combinacoes, Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Id, Grafo->Adj[escola-1].Id);
-                    InsereFinalLISTA(combinacoes, aux.Id, Grafo->Adj[escola-1].Id);
-                    Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Livre = 1;
-                    Grafo->Adj[i].Livre = 0;
-                    ImprimeLISTA(combinacoes);
-                    // tira da lista o professor menos qualificado e coloca o novo
-                } else if (aux.Habilitacao == Grafo->Adj[escola-1].Segunda_Habilitacao && Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Habilitacao != Grafo->Adj[escola-1].Segunda_Habilitacao) { 
-                    RemoveBuscaLISTA(combinacoes, Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Id, Grafo->Adj[escola-1].Id);
-                    InsereFinalLISTA(combinacoes, aux.Id, Grafo->Adj[escola-1].Id);
-                    Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Livre = 1;
-                    Grafo->Adj[i].Livre = 0;
-                    //ImprimeLISTA(combinacoes);
-                    // tira da lista o professor menos qualificado da segunda habilitação e coloca o novo
-                } else {
-                    aux_free = aux.Primeiro;
-                    aux.Primeiro = aux.Primeiro->Prox;
-                    free(aux_free);
-                    // retira a aresta do grafo (ou a gente pode colocar um ponteiro pra uma posição, como primeiro e ultimo)
-                }
-            }
-
-            i++;
-        }
-
-
-        algum_livre = 0;
-        algum_com_proposta = 0;
-        for(int i = 0; i < 100; i++) {
-            if(Grafo->Adj[i].Primeiro != Grafo->Adj[i].Ultimo)
-                algum_com_proposta = 1;
-            if(Grafo->Adj[i].Livre >= 1)
-                algum_livre = 1;
-        }
-    }*/
 
     LiberaLISTA(combinacoes);
 }

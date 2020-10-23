@@ -18,7 +18,9 @@ int InsereInicioLISTA(LISTA **inicio, int professor, int escola);
 
 int InsereFinalLISTA(LISTA **inicio, int professor, int escola);
 
-int ProfessorLISTA(LISTA **inicio, int escola);
+int ProfessorLISTA(LISTA **inicio, int escola, int habilitacao);
+
+int TrocaProfessorLISTA(LISTA **inicio, int escola, int atual, int substituto);
 
 int BuscaLISTA(LISTA **inicio, int elemento);
 
