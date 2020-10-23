@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "lista.h"
 
 /* Estrutura de cada uma das células adjacentes*/
 typedef struct Struct_Celula *Apontador;
@@ -15,6 +16,7 @@ typedef struct TipoLista {
     int Id;
     int Habilitacao;
     int Segunda_Habilitacao;
+    int Livre;
     Apontador Primeiro, Ultimo;
 } TipoLista;
 
@@ -26,12 +28,13 @@ typedef struct TipoGrafo {
 } TipoGrafo;
 
 /* Função responsável por criar a lista de adjacentes */
-void cria_lista_vazia(TipoLista *Lista, int habilitacao1, int habilitacao2, int id) {
+void cria_lista_vazia(TipoLista *Lista, int habilitacao1, int habilitacao2, int id, int livre) {
     Lista->Primeiro = (Apontador) malloc (sizeof(Celula));
     Lista->Ultimo = Lista->Primeiro;
     Lista->Id = id;
     Lista->Habilitacao = habilitacao1;
     Lista->Segunda_Habilitacao = habilitacao2;
+    Lista->Livre = livre;
     Lista->Primeiro->Prox = NULL;
 }
 
@@ -40,9 +43,9 @@ void cria_grafo_vazio(TipoGrafo *Grafo, int habilitacoes[]) {
     int cont_hab_dupla = 0;
     for(int i = 0; i < Grafo->NumVertices; i++) {
         if(habilitacoes[i+cont_hab_dupla] < 10)
-            cria_lista_vazia(&Grafo->Adj[i], habilitacoes[i+cont_hab_dupla], 0, i+1);
+            cria_lista_vazia(&Grafo->Adj[i], habilitacoes[i+cont_hab_dupla], 0, i+1, 1);
         else {
-            cria_lista_vazia(&Grafo->Adj[i], habilitacoes[i+cont_hab_dupla]-10, habilitacoes[i+cont_hab_dupla+1]-10, i+1);
+            cria_lista_vazia(&Grafo->Adj[i], habilitacoes[i+cont_hab_dupla]-10, habilitacoes[i+cont_hab_dupla+1]-10, i+1, 2);
             cont_hab_dupla++;
         }
     }
@@ -75,7 +78,7 @@ void insere_aresta(int id, TipoLista *Lista) {
 void imprime_grafo(TipoGrafo *Grafo) {
     Apontador Aux;
     for(int i = 0; i < Grafo->NumVertices; i++) {
-        printf("%d: %d %d\n", Grafo->Adj[i].Id, Grafo->Adj[i].Habilitacao, Grafo->Adj[i].Segunda_Habilitacao);
+        printf("%d: %d %d free %d\n", Grafo->Adj[i].Id, Grafo->Adj[i].Habilitacao, Grafo->Adj[i].Segunda_Habilitacao, Grafo->Adj[i].Livre);
         if(Grafo->Adj[i].Primeiro != Grafo->Adj[i].Ultimo) {    // Se não for vazio
             Aux = Grafo->Adj[i].Primeiro->Prox;
             while(Aux != NULL) {
@@ -163,7 +166,7 @@ void leitura_arq_arestas(TipoGrafo *Grafo) {
                     } else {
                         escola = (int)linha[i+1] - 48;
                     }
-                    insere_aresta(escola, &Grafo->Adj[id-1]);
+                    insere_aresta(escola + 100, &Grafo->Adj[id-1]);
                     insere_aresta(id, &Grafo->Adj[escola+99]);
                 }
                 i++;
@@ -176,18 +179,103 @@ void leitura_arq_arestas(TipoGrafo *Grafo) {
 }
 
 void gale_shapley(TipoGrafo *Grafo) {
-    LISTA **professores;
-    professores = CriaIniciaLISTA();
+    LISTA **combinacoes;
+    combinacoes = CriaIniciaLISTA();
+    Apontador aux_free;
+    int algum_livre = 1, cont = 0, id_escola, oi = 0, hab1, hab2, hab_prof;
 
-    for(int i = 0; i < 100; i++) {
-        InsereInicioLISTA(professores, i, 0);
+    while(algum_livre == 1/*cont < 100*/) {
+
+        id_escola = Grafo->Adj[cont].Primeiro->Prox->Id_Adjacente;
+        hab1 = Grafo->Adj[id_escola-1].Habilitacao;
+        hab2 = Grafo->Adj[id_escola-1].Segunda_Habilitacao;
+        hab_prof = Grafo->Adj[cont].Habilitacao;
+        if(Grafo->Adj[cont].Livre != 0) {
+            if(Grafo->Adj[id_escola-1].Livre > 0) {
+                InsereFinalLISTA(combinacoes, cont+1, id_escola);
+                ImprimeLISTA(combinacoes);
+                Grafo->Adj[id_escola-1].Livre--;
+                Grafo->Adj[cont].Livre = 0;
+            }/* else if(hab_prof == hab1 && Grafo->Adj[ProfessorLISTA(combinacoes, id_escola) - 1].Habilitacao != hab1){
+                int id_prof_removido = ProfessorLISTA(combinacoes, id_escola);
+                RemoveBuscaLISTA(combinacoes, id_prof_removido, id_escola);
+                InsereFinalLISTA(combinacoes, cont+1, id_escola);
+                Grafo->Adj[cont].Livre = 0;
+                Grafo->Adj[id_prof_removido-1].Livre = 1;
+                aux_free = Grafo->Adj[id_prof_removido-1].Primeiro->Prox;
+                Grafo->Adj[id_prof_removido-1].Primeiro->Prox = aux_free->Prox;
+                free(aux_free);
+            }*/ else {            // ESTOU COM A IDEIA DE TALVEZ COLOCAR O ID DOS PROFESSORES CONTRATADOS PROVISORIAMENTE NO VÉRTICE DAS ESCOLAS E VICE-VERSA
+                aux_free = Grafo->Adj[cont].Primeiro->Prox;
+                Grafo->Adj[cont].Primeiro->Prox = aux_free->Prox;
+                free(aux_free);
+                if(Grafo->Adj[cont].Primeiro->Prox == NULL)
+                    Grafo->Adj[cont].Livre = 0;
+            }
+        }
+
+        algum_livre = 0;
+        for(int i = 0; i < 100; i++) {
+            if(Grafo->Adj[i].Livre > 0)
+                algum_livre = 1;
+        }
+        cont++;
+        if(cont == 100)
+            cont = 0;
     }
+    /*
+    int professor, escola, algum_livre = 1, algum_com_proposta = 1, i = 0;
+    TipoLista aux;
+    Apontador aux_free;
 
-    while(!ehVaziaLista(professores)){
+    while(algum_livre && algum_com_proposta){
+        i = 0;
+        while(i < 100) {
+            aux = Grafo->Adj[i];
+            if(aux.Primeiro != aux.Ultimo && Grafo->Adj[i].Livre == 1) {
+                escola = aux.Primeiro->Prox->Id_Adjacente;
+                if(Grafo->Adj[escola-1].Livre > 0) {
+                    InsereFinalLISTA(combinacoes, i+1, escola);    // Estamos colocando a POSICAO NA LISTA DE ADJ não o id deles de verdade (que é +1)
+                    Grafo->Adj[escola-1].Livre--;
+                    Grafo->Adj[i].Livre = 0;
+                    ImprimeLISTA(combinacoes);
+                } else if (aux.Habilitacao == Grafo->Adj[escola-1].Habilitacao && Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Habilitacao != Grafo->Adj[escola-1].Habilitacao) {
+                    RemoveBuscaLISTA(combinacoes, Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Id, Grafo->Adj[escola-1].Id);
+                    InsereFinalLISTA(combinacoes, aux.Id, Grafo->Adj[escola-1].Id);
+                    Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Livre = 1;
+                    Grafo->Adj[i].Livre = 0;
+                    ImprimeLISTA(combinacoes);
+                    // tira da lista o professor menos qualificado e coloca o novo
+                } else if (aux.Habilitacao == Grafo->Adj[escola-1].Segunda_Habilitacao && Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Habilitacao != Grafo->Adj[escola-1].Segunda_Habilitacao) { 
+                    RemoveBuscaLISTA(combinacoes, Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Id, Grafo->Adj[escola-1].Id);
+                    InsereFinalLISTA(combinacoes, aux.Id, Grafo->Adj[escola-1].Id);
+                    Grafo->Adj[PosicaoLISTA(combinacoes, escola) - 1].Livre = 1;
+                    Grafo->Adj[i].Livre = 0;
+                    //ImprimeLISTA(combinacoes);
+                    // tira da lista o professor menos qualificado da segunda habilitação e coloca o novo
+                } else {
+                    aux_free = aux.Primeiro;
+                    aux.Primeiro = aux.Primeiro->Prox;
+                    free(aux_free);
+                    // retira a aresta do grafo (ou a gente pode colocar um ponteiro pra uma posição, como primeiro e ultimo)
+                }
+            }
 
-    }
+            i++;
+        }
 
-    LiberaLISTA(professores);
+
+        algum_livre = 0;
+        algum_com_proposta = 0;
+        for(int i = 0; i < 100; i++) {
+            if(Grafo->Adj[i].Primeiro != Grafo->Adj[i].Ultimo)
+                algum_com_proposta = 1;
+            if(Grafo->Adj[i].Livre >= 1)
+                algum_livre = 1;
+        }
+    }*/
+
+    LiberaLISTA(combinacoes);
 }
 
 int main() {
@@ -203,8 +291,8 @@ int main() {
     leitura_arq_arestas(&Grafo);
 
     //imprime_grafo(&Grafo);
-
     gale_shapley(&Grafo);
+    //imprime_grafo(&Grafo);
 
     libera_grafo(&Grafo);
 

@@ -28,7 +28,7 @@ int ehVaziaLISTA(LISTA **inicio){
 }
 
 // Insere um novo elemento no início da lista
-int InsereInicioLISTA(LISTA **inicio, int id, int livre){
+int InsereInicioLISTA(LISTA **inicio, int professor, int escola){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
@@ -39,8 +39,8 @@ int InsereInicioLISTA(LISTA **inicio, int id, int livre){
 		return 0;
 
 	novono->prox = NULL;
-	novono->id_professor = id;
-    novono->livre = livre;
+	novono->id_professor = professor;
+    novono->id_escola = escola;
 
 	LISTA *aux;
 
@@ -54,7 +54,7 @@ int InsereInicioLISTA(LISTA **inicio, int id, int livre){
 }
 
 // Insere um novo elemento no final da lista
-int InsereFinalLISTA(LISTA **inicio, int id, int livre){
+int InsereFinalLISTA(LISTA **inicio, int professor, int escola){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
@@ -64,8 +64,8 @@ int InsereFinalLISTA(LISTA **inicio, int id, int livre){
 	if(novono == NULL)
 		return 0;
 
-	novono->id_professor = id;
-    novono->livre = livre;
+	novono->id_professor = professor;
+    novono->id_escola = escola;
 	novono->prox = NULL;
 
 	if(ehVaziaLISTA(inicio) == 1){
@@ -87,24 +87,21 @@ int InsereFinalLISTA(LISTA **inicio, int id, int livre){
 }
 
 // Retorna um elemento em determinada posição
-int PosicaoLISTA(LISTA **inicio, int posicao){
+int ProfessorLISTA(LISTA **inicio, int escola){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
 	if(ehVaziaLISTA(inicio) == 1)
 		return 0;
 
-	int atual = 0;
-
 	LISTA *aux;
 
 	aux = *inicio;
 
 	while(aux != NULL){
-		if(atual == posicao)
+		if(aux->id_escola == escola)
 			return aux->id_professor;
 
-		atual++;
 		aux = aux->prox;
 	}
 
@@ -119,20 +116,59 @@ int BuscaLISTA(LISTA **inicio, int elemento){
 	if(ehVaziaLISTA(inicio) == 1)
 		return 0;
 
-	int i = 1;
+	int i = 0;
 
 	LISTA *aux;
 
 	aux = *inicio;
 
 	while(aux != NULL){
-		if(aux->id_professor == elemento)
+		if(aux->id_escola == elemento)
 			return i;
 
 		i++;
 
 		aux = aux->prox;
 	}
+
+	return 0;
+}
+
+int RemoveBuscaLISTA(LISTA **inicio, int professor, int escola){
+	if(ExisteLISTA(inicio) == 0)
+		return 0;
+
+	if(ehVaziaLISTA(inicio) == 1)
+		return 0;
+
+	LISTA *aux, *ant;
+
+	aux = *inicio;
+	//printf("teste1\n\n");
+
+	if(aux->id_professor == professor && aux->id_escola == escola){
+		*inicio = aux->prox;
+		free(aux);
+		//printf("teste2\n\n");
+		return 1;
+	}
+
+	while(aux->prox != NULL){
+		ant = aux;
+		aux = aux->prox;
+		//printf("teste3\n\n");
+
+
+		//printf("teste4\n\n");
+		if(aux->id_professor == professor && aux->id_escola == escola){
+			ant->prox = aux->prox;
+			free(aux);
+			//printf("teste5\n\n");
+			return 1;
+		}
+
+	}
+	//printf("teste6\n\n");
 
 	return 0;
 }
@@ -204,7 +240,7 @@ void ImprimeLISTA(LISTA **inicio){
 	aux = *inicio;
 
 	while(aux != NULL){
-		printf("%d => ", aux->id_professor);
+		printf("%d %d => ", aux->id_professor, aux->id_escola);
 		aux = aux->prox;
 	}
 

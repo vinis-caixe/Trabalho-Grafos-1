@@ -3,7 +3,7 @@
 
 struct node{
     int id_professor;
-    int livre;
+    int id_escola;
     struct node *prox;
 };
 typedef struct node LISTA;
@@ -14,13 +14,15 @@ int ExisteLISTA(LISTA **inicio);
 
 int ehVaziaLISTA(LISTA **inicio);
 
-int InsereInicioLISTA(LISTA **inicio, int id, int livre);
+int InsereInicioLISTA(LISTA **inicio, int professor, int escola);
 
-int InsereFinalLISTA(LISTA **inicio, int id, int livre);
+int InsereFinalLISTA(LISTA **inicio, int professor, int escola);
 
-int PosicaoLISTA(LISTA **inicio, int posicao);
+int ProfessorLISTA(LISTA **inicio, int escola);
 
 int BuscaLISTA(LISTA **inicio, int elemento);
+
+int RemoveBuscaLISTA(LISTA **inicio, int professor, int escola);
 
 int RemoveInicioLISTA(LISTA **inicio);
 
