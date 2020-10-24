@@ -87,25 +87,53 @@ int InsereFinalLISTA(LISTA **inicio, int professor, int escola){
 }
 
 // Retorna um elemento em determinada posição
-int ProfessorLISTA(LISTA **inicio, int escola){
+int ProfessorLISTA(LISTA **inicio, int escola, int habilitacao){
 	if(ExisteLISTA(inicio) == 0)
-		return 0;
+		return -1;
 
 	if(ehVaziaLISTA(inicio) == 1)
-		return 0;
+		return -1;
 
 	LISTA *aux;
 
 	aux = *inicio;
 
 	while(aux != NULL){
-		if(aux->id_escola == escola)
+		if(aux->id_escola == escola && habilitacao == 1){
 			return aux->id_professor;
+		}
+
+		if(aux->id_escola == escola && habilitacao == 2){
+			habilitacao = 1;
+		}
 
 		aux = aux->prox;
 	}
 
 	return -1;
+}
+
+int TrocaProfessorLISTA(LISTA **inicio, int escola, int atual, int substituto){
+    if(ExisteLISTA(inicio) == 0)
+		return -1;
+
+	if(ehVaziaLISTA(inicio) == 1)
+		return -1;
+
+    LISTA *aux;
+
+    aux = *inicio;
+
+    while(aux != NULL){
+        if(aux->id_escola == escola && aux->id_professor == atual){
+            aux->id_professor = substituto;
+            return 1;
+        }
+
+        aux = aux->prox;
+    }
+
+    return -1;
 }
 
 // Retorna a posição de um elemento
