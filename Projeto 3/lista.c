@@ -27,7 +27,7 @@ int ehVaziaLISTA(LISTA **inicio){
 	return 0;
 }
 
-// Insere um novo elemento no início da lista
+// Insere uma conexão entre professor e escola no início da lista
 int InsereInicioLISTA(LISTA **inicio, int professor, int escola){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -53,7 +53,7 @@ int InsereInicioLISTA(LISTA **inicio, int professor, int escola){
 	return 1;
 }
 
-// Insere um novo elemento no final da lista
+// Insere uma conexão entre professor e escola no final da lista
 int InsereFinalLISTA(LISTA **inicio, int professor, int escola){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -86,7 +86,7 @@ int InsereFinalLISTA(LISTA **inicio, int professor, int escola){
 	return 1;
 }
 
-// Retorna um elemento em determinada posição
+// Retorna o id do professor em determinada escola
 int ProfessorLISTA(LISTA **inicio, int escola, int habilitacao){
 	if(ExisteLISTA(inicio) == 0)
 		return -1;
@@ -99,11 +99,11 @@ int ProfessorLISTA(LISTA **inicio, int escola, int habilitacao){
 	aux = *inicio;
 
 	while(aux != NULL){
-		if(aux->id_escola == escola && habilitacao == 1){
+		if(aux->id_escola == escola && habilitacao == 1){ // Se a habilitação for 1 retornará o id do professor na primeira vaga
 			return aux->id_professor;
 		}
 
-		if(aux->id_escola == escola && habilitacao == 2){
+		if(aux->id_escola == escola && habilitacao == 2){ // Se a habilitação for 2 o nó da primeira vaga é pulada e começa a procurar pela segunda vaga
 			habilitacao = 1;
 		}
 
@@ -113,6 +113,7 @@ int ProfessorLISTA(LISTA **inicio, int escola, int habilitacao){
 	return -1;
 }
 
+// Procura um nó com determinada escola e professor e substitui este por outro professor
 int TrocaProfessorLISTA(LISTA **inicio, int escola, int atual, int substituto){
     if(ExisteLISTA(inicio) == 0)
 		return -1;
@@ -162,46 +163,7 @@ int BuscaLISTA(LISTA **inicio, int elemento){
 	return 0;
 }
 
-int RemoveBuscaLISTA(LISTA **inicio, int professor, int escola){
-	if(ExisteLISTA(inicio) == 0)
-		return 0;
-
-	if(ehVaziaLISTA(inicio) == 1)
-		return 0;
-
-	LISTA *aux, *ant;
-
-	aux = *inicio;
-	//printf("teste1\n\n");
-
-	if(aux->id_professor == professor && aux->id_escola == escola){
-		*inicio = aux->prox;
-		free(aux);
-		//printf("teste2\n\n");
-		return 1;
-	}
-
-	while(aux->prox != NULL){
-		ant = aux;
-		aux = aux->prox;
-		//printf("teste3\n\n");
-
-
-		//printf("teste4\n\n");
-		if(aux->id_professor == professor && aux->id_escola == escola){
-			ant->prox = aux->prox;
-			free(aux);
-			//printf("teste5\n\n");
-			return 1;
-		}
-
-	}
-	//printf("teste6\n\n");
-
-	return 0;
-}
-
-// Remove o elemento do início da lista
+// Remove o nó do início da lista
 int RemoveInicioLISTA(LISTA **inicio){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -220,7 +182,7 @@ int RemoveInicioLISTA(LISTA **inicio){
 	return 1;
 }
 
-// Remove o elemento no final da lista
+// Remove o nó no final da lista
 int RemoveFinalLISTA(LISTA **inicio){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -251,7 +213,7 @@ int RemoveFinalLISTA(LISTA **inicio){
 	return 1;
 }
 
-// Imprime a lista
+// Imprime o emparelhamento estável máximo
 void ImprimeLISTA(LISTA **inicio){
 	if(ExisteLISTA(inicio) == 0){
 		printf("Erro! Lista nao existe.");
@@ -266,11 +228,13 @@ void ImprimeLISTA(LISTA **inicio){
 	LISTA *aux;
 
 	aux = *inicio;
-
+	int num_prof_alocados = 0;
 	while(aux != NULL){
-		printf("%d %d => ", aux->id_professor, aux->id_escola);
+		printf("Professor: P%d\tEscola: E%d \n", aux->id_professor, aux->id_escola - 100);
+		num_prof_alocados++;
 		aux = aux->prox;
 	}
+	printf("\nNumero de professores alocados estavelmente: %d\n", num_prof_alocados);
 
 	printf("\n");
 }
