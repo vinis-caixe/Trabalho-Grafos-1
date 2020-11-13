@@ -16,6 +16,7 @@ typedef struct TipoLista {
     int Id_Vertice; // TIRAR OU MANTER O ID?
     char Nome_Vertice[42];
     int Semestre;
+    int Horarios[3];
 } TipoLista;
 
 typedef struct TipoGrafo {
@@ -32,6 +33,8 @@ void cria_lista_vazia(TipoLista *Lista, int codigo, int peso, int id, char nome[
     Lista->Id_Vertice = id;
     strcpy(Lista->Nome_Vertice, nome);  // Armazenamos o nome da disciplina
     Lista->Semestre = semestre;
+    for(int i = 0; i < 3; i++)
+        Lista->Horarios[i] = 0;
     Lista->Primeiro->Prox = NULL;
 }
 
@@ -105,6 +108,20 @@ void monta_grafo(TipoGrafo *Grafo) {
     fclose(arq);
 }
 
+void libera_grafo(TipoGrafo *Grafo) {
+    Apontador anterior, aux;
+    for(int i = 0; i < Grafo->NumVertices; i++) {
+        aux = Grafo->Adj[i].Primeiro->Prox;
+        free(Grafo->Adj[i].Primeiro);   // Libera o primeiro elemento
+        Grafo->Adj[i].Primeiro = NULL;
+        while(aux != NULL) {            // Libera os demais, até que não existam outros
+            anterior = aux;
+            aux = aux->Prox;
+            free(anterior);
+        }
+    }
+}
+
 int main() {
     TipoGrafo Grafo;
     Grafo.NumVertices = 31;
@@ -115,6 +132,10 @@ int main() {
     monta_grafo(&Grafo);
 
     imprime_grafo(&Grafo);
+
+    
+
+    libera_grafo(&Grafo);
 
     return 0;
 }
