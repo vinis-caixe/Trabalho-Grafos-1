@@ -11,7 +11,7 @@ LISTA ** CriaIniciaLISTA(){
 	return novo;
 }
 
-// Verifica se exite uma lista
+// Verifica se exite uma lista existe
 int ExisteLISTA(LISTA **inicio){
 	if(inicio == NULL)
 		return 0;
@@ -27,33 +27,8 @@ int ehVaziaLISTA(LISTA **inicio){
 	return 0;
 }
 
-// Insere um novo elemento no início da lista
-int InsereInicioLISTA(LISTA **inicio, int novo){
-	if(ExisteLISTA(inicio) == 0)
-		return 0;
-
-	LISTA *novono;
-
-	novono = (LISTA *) malloc(sizeof(LISTA));
-	if(novono == NULL)
-		return 0;
-
-	novono->prox = NULL;
-	novono->elem = novo;
-
-	LISTA *aux;
-
-	aux = *inicio;
-
-	*inicio = novono;
-
-	novono->prox = aux;
-
-	return 1;
-}
-
-// Insere um novo elemento no final da lista
-int InsereFinalLISTA(LISTA **inicio, int novo){
+// Insere um novo elemento no final da lista junto com seu código
+int InsereFinalLISTA(LISTA **inicio, int novo, int codigo){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
@@ -63,6 +38,7 @@ int InsereFinalLISTA(LISTA **inicio, int novo){
 	if(novono == NULL)
 		return 0;
 
+	novono->cod = codigo;
 	novono->elem = novo;
 	novono->prox = NULL;
 
@@ -84,40 +60,13 @@ int InsereFinalLISTA(LISTA **inicio, int novo){
 	return 1;
 }
 
-// Retorna um elemento em determinada posição
-int PosicaoLISTA(LISTA **inicio, int posicao){
+// Procura um Id na lista e retorna seu código
+int BuscaCodigo(LISTA **inicio, int elemento){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
 	if(ehVaziaLISTA(inicio) == 1)
 		return 0;
-
-	int atual = 0;
-
-	LISTA *aux;
-
-	aux = *inicio;
-
-	while(aux != NULL){
-		if(atual == posicao)
-			return aux->elem;
-
-		atual++;
-		aux = aux->prox;
-	}
-
-	return -1;
-}
-
-// Retorna a posição de um elemento
-int BuscaLISTA(LISTA **inicio, int elemento){
-	if(ExisteLISTA(inicio) == 0)
-		return 0;
-
-	if(ehVaziaLISTA(inicio) == 1)
-		return 0;
-
-	int i = 1;
 
 	LISTA *aux;
 
@@ -125,9 +74,7 @@ int BuscaLISTA(LISTA **inicio, int elemento){
 
 	while(aux != NULL){
 		if(aux->elem == elemento)
-			return i;
-
-		i++;
+			return aux->cod;
 
 		aux = aux->prox;
 	}
@@ -135,6 +82,7 @@ int BuscaLISTA(LISTA **inicio, int elemento){
 	return 0;
 }
 
+// Verifica se um Id está na lista
 int ExisteElemento(LISTA **inicio, int elemento){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
@@ -156,56 +104,6 @@ int ExisteElemento(LISTA **inicio, int elemento){
 	return 0;
 }
 
-// Remove o elemento do início da lista
-int RemoveInicioLISTA(LISTA **inicio){
-	if(ExisteLISTA(inicio) == 0)
-		return 0;
-
-	if(ehVaziaLISTA(inicio) == 1)
-		return 0;
-
-	LISTA *aux;
-
-	aux = *inicio;
-
-	*inicio = (*inicio)->prox;
-
-	free(aux);
-
-	return 1;
-}
-
-// Remove o elemento no final da lista
-int RemoveFinalLISTA(LISTA **inicio){
-	if(ExisteLISTA(inicio) == 0)
-		return 0;
-
-	if(ehVaziaLISTA(inicio) == 1)
-		return 0;
-
-	LISTA *aux, *ant;
-
-	aux = *inicio;
-
-	if(aux->prox == NULL){
-		free(aux);
-		*inicio = NULL;
-		return 1;
-	}
-
-	while(aux->prox != NULL){
-		ant = aux;
-
-		aux = aux->prox;
-	}
-
-	free(aux);
-
-	ant->prox = NULL;
-
-	return 1;
-}
-
 // Imprime a lista
 void ImprimeLISTA(LISTA **inicio){
 	if(ExisteLISTA(inicio) == 0){
@@ -223,7 +121,7 @@ void ImprimeLISTA(LISTA **inicio){
 	aux = *inicio;
 
 	while(aux != NULL){
-		printf("%d => ", aux->elem);
+		printf("%d %d => ", aux->elem, aux->cod);
 		aux = aux->prox;
 	}
 

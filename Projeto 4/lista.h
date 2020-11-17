@@ -2,7 +2,8 @@
 #include <stdlib.h>
 
 struct node{
-    int elem;
+    int elem; // Id da matéria
+    int cod;  // Código da matéria
     struct node *prox;
 };
 typedef struct node LISTA;
@@ -13,19 +14,11 @@ int ExisteLISTA(LISTA **inicio);
 
 int ehVaziaLISTA(LISTA **inicio);
 
-int InsereInicioLISTA(LISTA **inicio, int novo);
+int InsereFinalLISTA(LISTA **inicio, int novo, int codigo);
 
-int InsereFinalLISTA(LISTA **inicio, int novo);
-
-int PosicaoLISTA(LISTA **inicio, int posicao);
-
-int BuscaLISTA(LISTA **inicio, int elemento);
+int BuscaCodigo(LISTA **inicio, int elemento);
 
 int ExisteElemento(LISTA **inicio, int elemento);
-
-int RemoveInicioLISTA(LISTA **inicio);
-
-int RemoveFinalLISTA(LISTA **inicio);
 
 void ImprimeLISTA(LISTA **inicio);
 
