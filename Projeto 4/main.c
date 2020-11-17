@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "lista.h"
 
 typedef struct Struct_Celula *Apontador;
 struct Struct_Celula {
@@ -122,6 +123,85 @@ void libera_grafo(TipoGrafo *Grafo) {
     }
 }
 
+void imprime_passos(TipoGrafo *Grafo, LISTA **lista, int i) {
+    char horarios_unb[20][8] = {"SEG 08h", "SEG 10h", "TER 08h", "TER 10h", "QUA 08h", "QUA 10h", "QUI 08h", "QUI 10h", "SEX 08h", 
+    "SEX 10h", "SEG 14h", "SEG 16h", "TER 14h", "TER 16h", "QUA 14h", "QUA 16h", "QUI 14h", "QUI 16h", "SEX 14h", "SEX 16h"};
+
+    printf("%d - %s:\n", Grafo->Adj[i].Codigo_Vertice, Grafo->Adj[i].Nome_Vertice);
+    int num_aulas = Grafo->Adj[i].Peso_Vertice / 2, cont = 0;
+    while(cont != num_aulas) {
+        printf("\t%s\t", horarios_unb[Grafo->Adj[i].Horarios[cont]]);
+        cont++;
+    }
+    printf("\n\n");
+}
+
+void imprime_alocacao_final(TipoGrafo *Grafo, LISTA **lista) {
+    int num_aulas, cont = 0;
+    printf("\t\tSEG\tTER\tQUA\tQUI\tSEX\n");
+    printf("08h00-09h50");
+    for(int i = 0; i < 20; i++) {
+        if(ExisteElemento(lista, i)){
+            num_aulas = Grafo->Adj[i].Peso_Vertice / 2;
+            while(cont < num_aulas) {
+                if(Grafo->Adj[i].Horarios[cont] == i) {
+                    printf("%d\t", Grafo->Adj[i].Codigo_Vertice);
+                    break;
+                }
+                cont++;
+            }
+            cont = 0;
+        }
+        if(i == 8 || i == 9 || i == 18 || i == 19)
+            printf("\n");
+    }
+    
+}
+
+void algoritmo_guloso(TipoGrafo *Grafo) {
+    LISTA **lista;
+    lista = CriaIniciaLISTA();
+    int semestre = 0, horario = 0, num_aulas, cont = 0;
+
+    for(int i = 0; i < 31; i++) {
+
+        if(semestre != Grafo->Adj[i].Semestre) {
+            imprime_alocacao_final(Grafo, lista);
+            LimpaLISTA(lista);
+            semestre = Grafo->Adj[i].Semestre;
+            printf("----- %do SEMESTRE -----\n\n", semestre);
+        }
+        
+        num_aulas = Grafo->Adj[i].Peso_Vertice / 2;
+        while(cont != num_aulas) {
+
+            while(ExisteElemento(lista, horario))
+                horario++;
+
+            
+        
+            if((num_aulas > 1) && (cont == 0)) {
+                if(horario == 8)
+                    horario += 2;
+                else if(horario == 9)
+                    horario += 1;
+            }
+
+            InsereFinalLISTA(lista, horario);
+            Grafo->Adj[i].Horarios[cont] = horario;
+            horario += 4;
+            if(horario >= 10 && cont > 0)
+                horario -= 2;
+            cont++;
+        }
+        imprime_passos(Grafo, lista, i);
+        horario = 0;
+        cont = 0;
+    }
+    
+    LiberaLISTA(lista);
+}
+
 int main() {
     TipoGrafo Grafo;
     Grafo.NumVertices = 31;
@@ -133,7 +213,9 @@ int main() {
 
     imprime_grafo(&Grafo);
 
-    
+    printf("\n---------- SAIDAS INTERMEDIARIAS ----------\n\n");
+
+    algoritmo_guloso(&Grafo);
 
     libera_grafo(&Grafo);
 
