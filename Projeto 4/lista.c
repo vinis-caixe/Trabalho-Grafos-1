@@ -28,7 +28,7 @@ int ehVaziaLISTA(LISTA **inicio){
 }
 
 // Insere um novo elemento no final da lista junto com seu código
-int InsereFinalLISTA(LISTA **inicio, int novo, int codigo){
+int InsereFinalLISTA(LISTA **inicio, int novo, int codigo, int adjacente){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
@@ -40,6 +40,7 @@ int InsereFinalLISTA(LISTA **inicio, int novo, int codigo){
 
 	novono->cod = codigo;
 	novono->elem = novo;
+	novono->id_adjacente = adjacente;
 	novono->prox = NULL;
 
 	if(ehVaziaLISTA(inicio) == 1){
@@ -83,7 +84,7 @@ int BuscaCodigo(LISTA **inicio, int elemento){
 }
 
 // Verifica se um Id está na lista
-int ExisteElemento(LISTA **inicio, int elemento){
+int ExisteElemento(LISTA **inicio, int elemento, int adjacente){
 	if(ExisteLISTA(inicio) == 0)
 		return 0;
 
@@ -95,7 +96,10 @@ int ExisteElemento(LISTA **inicio, int elemento){
 	aux = *inicio;
 
 	while(aux != NULL){
-		if(aux->elem == elemento)
+		if(aux->elem == elemento && aux->id_adjacente == adjacente)
+			return 1;
+
+		if(aux->elem == elemento && adjacente == -1)
 			return 1;
 
 		aux = aux->prox;
@@ -121,7 +125,7 @@ void ImprimeLISTA(LISTA **inicio){
 	aux = *inicio;
 
 	while(aux != NULL){
-		printf("%d %d => ", aux->elem, aux->cod);
+		printf("%d %d %d => ", aux->elem, aux->cod, aux->id_adjacente);
 		aux = aux->prox;
 	}
 

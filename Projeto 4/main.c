@@ -175,11 +175,11 @@ void imprime_alocacao_final(TipoGrafo *Grafo, LISTA **lista, int semestre) {
         printf("%s\t", horas[i]);
         for(int j = 0; j < 9; j += 2){
             // Se for um horário da tarde e ele estiver na lista
-            if(i > 1 && ExisteElemento(lista, j+i+8))
+            if(i > 1 && ExisteElemento(lista, j+i+8, -1))
                 printf("%d\t", BuscaCodigo(lista, j+i+8));  // Imprime o código da matéria
 
             // Se for um horário da manhã e ele estiver na lista
-            else if(i <= 1 && ExisteElemento(lista, j+i))
+            else if(i <= 1 && ExisteElemento(lista, j+i, -1))
                 printf("%d\t", BuscaCodigo(lista, j+i));
             
             else
@@ -205,9 +205,13 @@ void imprime_alocacao_final(TipoGrafo *Grafo, LISTA **lista, int semestre) {
 void algoritmo_guloso(TipoGrafo *Grafo) {
 
     // Cria uma lista que contém os horários já ocupados pelos adjacentes
+    // Cada elemento da lista é composto pelo horário (0-19), código da disciplina que ocupa o horário
+    // e o id do adjacente, de forma que, ao procurar por algum adjacente colorido, ele encontre
+    // informações apenas sobre seus adjacentes, definido por esse id
     LISTA **lista;
     lista = CriaIniciaLISTA();
     int semestre = 0, horario = 0, num_aulas, cont = 0;
+    Apontador aux;
 
     // Sobre os 31 vértices, é seguida a ordem na lista de adjacência
     for(int i = 0; i < 31; i++) {
@@ -217,7 +221,6 @@ void algoritmo_guloso(TipoGrafo *Grafo) {
             // Imprime a alocação final do semestre
             if(semestre != 0)
                 imprime_alocacao_final(Grafo, lista, semestre);
-
             LimpaLISTA(lista);  // Retira os elementos da lista
             semestre = Grafo->Adj[i].Semestre;  // Atualiza o semestre
             printf("\n----- PASSO A PASSO DO %do SEMESTRE -----\n\n", semestre);
@@ -227,8 +230,8 @@ void algoritmo_guloso(TipoGrafo *Grafo) {
         // Repete de acordo com o número de aulas semanais da matéria
         while(cont != num_aulas) {
 
-            // Se o horário já está ocupado
-            while(ExisteElemento(lista, horario))
+            // Se o horário já está ocupado por um adjacente ao vértice atual
+            while(ExisteElemento(lista, horario, i))
                 horario++;
 
             // Se sobrou apenas horários na sexta, faz com que a aula vá para a tarde
@@ -239,8 +242,17 @@ void algoritmo_guloso(TipoGrafo *Grafo) {
                     horario += 1;
             }
 
-            // Insere o novo horário ocupado na lista
-            InsereFinalLISTA(lista, horario, Grafo->Adj[i].Codigo_Vertice);
+            aux = Grafo->Adj[i].Primeiro->Prox;
+            // Se elemento não tem adjacentes
+            if(aux == NULL)
+                InsereFinalLISTA(lista, horario, Grafo->Adj[i].Codigo_Vertice, -1);
+            // Enquanto tiver adjacentes
+            while(aux != NULL) {
+                // Insere na lista o elemento com o id desse adjacente
+                InsereFinalLISTA(lista, horario, Grafo->Adj[i].Codigo_Vertice, aux->Id);
+                aux = aux->Prox;
+            }
+            
             // Colore o vértice com o horário
             Grafo->Adj[i].Horarios[cont] = horario;
             
