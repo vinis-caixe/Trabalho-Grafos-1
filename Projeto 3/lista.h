@@ -24,8 +24,6 @@ int TrocaProfessorLISTA(LISTA **inicio, int escola, int atual, int substituto);
 
 int BuscaLISTA(LISTA **inicio, int elemento);
 
-int RemoveBuscaLISTA(LISTA **inicio, int professor, int escola);
-
 int RemoveInicioLISTA(LISTA **inicio);
 
 int RemoveFinalLISTA(LISTA **inicio);
